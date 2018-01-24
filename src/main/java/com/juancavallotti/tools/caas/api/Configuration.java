@@ -1,13 +1,13 @@
 package com.juancavallotti.tools.caas.api;
 
+import com.juancavallotti.tools.jaxrs.ext.PATCH;
+
 import java.lang.Object;
 import java.lang.String;
 import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
-
-import static javax.ws.rs.core.Response.*;
 
 @Path("/configuration")
 public interface Configuration {
@@ -35,15 +35,15 @@ public interface Configuration {
   @Consumes
   GetAppConfigurationResponse getApplicationConfiguration(@PathParam("application") String application, @PathParam("configVersion") String version, @PathParam("env") String environment);
 
-  @POST
-  @Path("/{application}/{configVersion}/{env}")
-  @Consumes("application/json")
-  PostAppConfigurationResponse postConfiguration(Object entity);
-
   @PUT
   @Path("/{application}/{configVersion}/{env}")
   @Consumes("application/json")
-  PutConfigurationResponse putConfiguration(Object entity);
+  PutAppConfigurationResponse putConfiguration(Object entity);
+
+  @PATCH
+  @Path("/{application}/{configVersion}/{env}")
+  @Consumes("application/json")
+  PatchAppConfigurationResponse patchConfiguration(Object entity);
 
   @GET
   @Path("/{application}/{configVersion}/{env}/dynamic/{key}")
@@ -229,12 +229,12 @@ public interface Configuration {
     }
   }
 
-  class PostAppConfigurationResponse extends ResponseDelegate {
-    private PostAppConfigurationResponse(Response response, Object entity) {
+  class PutAppConfigurationResponse extends ResponseDelegate {
+    private PutAppConfigurationResponse(Response response, Object entity) {
       super(response, entity);
     }
 
-    private PostAppConfigurationResponse(Response response) {
+    private PutAppConfigurationResponse(Response response) {
       super(response);
     }
 
@@ -271,45 +271,45 @@ public interface Configuration {
     }
   }
 
-  class PutConfigurationResponse extends ResponseDelegate {
-    private PutConfigurationResponse(Response response, Object entity) {
+  class PatchAppConfigurationResponse extends ResponseDelegate {
+    private PatchAppConfigurationResponse(Response response, Object entity) {
       super(response, entity);
     }
 
-    private PutConfigurationResponse(Response response) {
+    private PatchAppConfigurationResponse(Response response) {
       super(response);
     }
 
-    public static PutConfigurationResponse respond202() {
+    public static PatchAppConfigurationResponse respond202() {
       Response.ResponseBuilder responseBuilder = status(202);
-      return new PutConfigurationResponse(responseBuilder.build());
+      return new PatchAppConfigurationResponse(responseBuilder.build());
     }
 
-    public static PutConfigurationResponse respond400WithApplicationJson(Object entity) {
+    public static PatchAppConfigurationResponse respond400WithApplicationJson(Object entity) {
       Response.ResponseBuilder responseBuilder = status(400).header("Content-Type", "application/json");
       responseBuilder.entity(entity);
-      return new PutConfigurationResponse(responseBuilder.build(), entity);
+      return new PatchAppConfigurationResponse(responseBuilder.build(), entity);
     }
 
-    public static PutConfigurationResponse respond401() {
+    public static PatchAppConfigurationResponse respond401() {
       Response.ResponseBuilder responseBuilder = status(401);
-      return new PutConfigurationResponse(responseBuilder.build());
+      return new PatchAppConfigurationResponse(responseBuilder.build());
     }
 
-    public static PutConfigurationResponse respond403() {
+    public static PatchAppConfigurationResponse respond403() {
       Response.ResponseBuilder responseBuilder = status(403);
-      return new PutConfigurationResponse(responseBuilder.build());
+      return new PatchAppConfigurationResponse(responseBuilder.build());
     }
 
-    public static PutConfigurationResponse respond500() {
+    public static PatchAppConfigurationResponse respond500() {
       Response.ResponseBuilder responseBuilder = status(500);
-      return new PutConfigurationResponse(responseBuilder.build());
+      return new PatchAppConfigurationResponse(responseBuilder.build());
     }
 
-    public static PutConfigurationResponse respond404WithTextPlain(Object entity) {
+    public static PatchAppConfigurationResponse respond404WithTextPlain(Object entity) {
       Response.ResponseBuilder responseBuilder = status(404).header("Content-Type", "text/plain");
       responseBuilder.entity(entity);
-      return new PutConfigurationResponse(responseBuilder.build(), entity);
+      return new PatchAppConfigurationResponse(responseBuilder.build(), entity);
     }
   }
 

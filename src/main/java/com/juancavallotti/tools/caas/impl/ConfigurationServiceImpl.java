@@ -1,17 +1,13 @@
 package com.juancavallotti.tools.caas.impl;
 
 import com.juancavallotti.tools.caas.api.Configuration;
-import com.juancavallotti.tools.caas.api.ConfigurationElement;
 import com.juancavallotti.tools.caas.api.DefaultConfigurationElement;
-import com.juancavallotti.tools.caas.git.GitConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.inject.Inject;
-import java.util.Collections;
 import java.util.Map;
 
 public class ConfigurationServiceImpl implements Configuration {
@@ -59,12 +55,12 @@ public class ConfigurationServiceImpl implements Configuration {
     }
 
     @Override
-    public PostAppConfigurationResponse postConfiguration(Object entity) {
+    public PutAppConfigurationResponse putConfiguration(Object entity) {
         return null;
     }
 
     @Override
-    public PutConfigurationResponse putConfiguration(Object entity) {
+    public PatchAppConfigurationResponse patchConfiguration(Object entity) {
         return null;
     }
 
