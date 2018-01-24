@@ -2,6 +2,7 @@ package com.juancavallotti.tools.caas.api;
 
 import com.juancavallotti.tools.jaxrs.ext.PATCH;
 
+import java.io.InputStream;
 import java.lang.Object;
 import java.lang.String;
 import java.util.List;
@@ -68,7 +69,13 @@ public interface Configuration {
       "text/plain",
       "application/csv"
   })
-  PutConfigurationDynamicResponse putConfigurationDynamic(@HeaderParam("Content-Type") String contentType, Object entity);
+  PutConfigurationDynamicResponse putConfigurationDynamic(
+          @PathParam("application") String application,
+          @PathParam("configVersion") String version,
+          @PathParam("env") String environment,
+          @PathParam("key") String key,
+          @HeaderParam("Content-Type") String contentType,
+          InputStream entity);
 
   @POST
   @Path("/{application}/{configVersion}/{env}/promote/{toEnv}")

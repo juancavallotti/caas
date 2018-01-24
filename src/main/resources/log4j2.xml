@@ -9,6 +9,9 @@
         <AsyncLogger name="org.springframework" level="warn" />
         <AsyncLogger name="org.apache" level="warn" />
         <AsyncLogger name="org.hibernate" level="warn" />
+
+        <AsyncLogger name="com.juancavallotti.tools.caas.impl" level="debug" />
+
         <AsyncRoot level="info">
             <AppenderRef ref="Console"/>
         </AsyncRoot>

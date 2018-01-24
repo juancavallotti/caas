@@ -1,5 +1,6 @@
 package com.juancavallotti.tools.caas.mongo.repository;
 
+import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.mongo.model.MongoConfigCoordinate;
 import com.juancavallotti.tools.caas.mongo.model.MongoConfigurationElement;
 

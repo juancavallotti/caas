@@ -3,6 +3,7 @@ package com.juancavallotti.tools.caas.git;
 import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.api.DefaultConfigCoordinate;
 import com.juancavallotti.tools.caas.api.ConfigurationElement;
+import com.juancavallotti.tools.caas.api.Document;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.eclipse.jgit.api.Git;
@@ -17,6 +18,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.util.*;
 
 public class GitConfigurationServiceBackend implements ConfigurationServiceBackend {
@@ -85,6 +87,16 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     @Override
     public ConfigCoordinate createNewConfiguration(ConfigurationElement element) throws ConfigurationServiceBackendException {
+        return null;
+    }
+
+    @Override
+    public Document setDocument(ConfigCoordinate coordinate, String documentName, String contentType, InputStream documentData) throws ConfigurationServiceBackendException {
+        return null;
+    }
+
+    @Override
+    public Document getDocument(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException {
         return null;
     }
 

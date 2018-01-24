@@ -2,7 +2,9 @@ package com.juancavallotti.tools.caas.spi;
 
 import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.api.ConfigurationElement;
+import com.juancavallotti.tools.caas.api.Document;
 
+import java.io.InputStream;
 import java.util.List;
 
 public interface ConfigurationServiceBackend {
@@ -13,7 +15,11 @@ public interface ConfigurationServiceBackend {
 
     List<ConfigCoordinate> listConfigurations();
 
-    public ConfigCoordinate createNewConfiguration(ConfigurationElement element) throws ConfigurationServiceBackendException;
+    ConfigCoordinate createNewConfiguration(ConfigurationElement element) throws ConfigurationServiceBackendException;
+
+    Document setDocument(ConfigCoordinate coordinate, String documentName, String contentType, InputStream documentData) throws ConfigurationServiceBackendException;
+
+    Document getDocument(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException;
 
     ConfigurationElement findConfiguration(String application, String environment, String version) throws ConfigurationServiceBackendException;
 }
