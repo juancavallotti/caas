@@ -41,6 +41,10 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
     @Bean
     public ConfigurationServiceBackend findBackend() {
         ServiceLoader<ConfigurationServiceBackend> sl = ServiceLoader.load(ConfigurationServiceBackend.class);
+
+
+        //TODO - Be able to load backends based on configuration.
+
         return sl.findFirst().get();
     }
 
