@@ -39,11 +39,6 @@ public class ResponseDelegate extends Response {
   }
 
   @Override
-  public Locale getLanguage() {
-    return this.delegate.getLanguage();
-  }
-
-  @Override
   public URI getLocation() {
     return this.delegate.getLocation();
   }
@@ -54,47 +49,18 @@ public class ResponseDelegate extends Response {
   }
 
   @Override
-  public Object getEntity() {
-    return this.entity;}
-
-  @Override
-  public int getStatus() {
-    return this.delegate.getStatus();
-  }
-
-  @Override
-  public Response.StatusType getStatusInfo() {
-    return this.delegate.getStatusInfo();
-  }
-
-  @Override
-  public <T> T readEntity(Class<T> p0, Annotation[] p1) {
-    return this.delegate.readEntity(p0,p1);
-  }
-
-  @Override
-  public <T> T readEntity(GenericType<T> p0, Annotation[] p1) {
-    return this.delegate.readEntity(p0,p1);
-  }
-
-  @Override
-  public <T> T readEntity(GenericType<T> p0) {
-    return this.delegate.readEntity(p0);
-  }
-
-  @Override
-  public <T> T readEntity(Class<T> p0) {
-    return this.delegate.readEntity(p0);
-  }
-
-  @Override
-  public boolean hasEntity() {
-    return this.delegate.hasEntity();
+  public Locale getLanguage() {
+    return this.delegate.getLanguage();
   }
 
   @Override
   public boolean bufferEntity() {
     return this.delegate.bufferEntity();
+  }
+
+  @Override
+  public boolean hasEntity() {
+    return this.delegate.hasEntity();
   }
 
   @Override
@@ -150,6 +116,40 @@ public class ResponseDelegate extends Response {
   @Override
   public String getHeaderString(String p0) {
     return this.delegate.getHeaderString(p0);
+  }
+
+  @Override
+  public Object getEntity() {
+    return this.entity;}
+
+  @Override
+  public Response.StatusType getStatusInfo() {
+    return this.delegate.getStatusInfo();
+  }
+
+  @Override
+  public int getStatus() {
+    return this.delegate.getStatus();
+  }
+
+  @Override
+  public <T> T readEntity(Class<T> p0, Annotation[] p1) {
+    return this.delegate.readEntity(p0,p1);
+  }
+
+  @Override
+  public <T> T readEntity(GenericType<T> p0) {
+    return this.delegate.readEntity(p0);
+  }
+
+  @Override
+  public <T> T readEntity(GenericType<T> p0, Annotation[] p1) {
+    return this.delegate.readEntity(p0,p1);
+  }
+
+  @Override
+  public <T> T readEntity(Class<T> p0) {
+    return this.delegate.readEntity(p0);
   }
 
   @Override

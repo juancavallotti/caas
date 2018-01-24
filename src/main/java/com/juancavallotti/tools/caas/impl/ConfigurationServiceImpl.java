@@ -56,7 +56,7 @@ public class ConfigurationServiceImpl implements Configuration {
     }
 
     @Override
-    public PutConfigurationDynamicResponse putConfigurationDynamic(String contentType) {
+    public PutConfigurationDynamicResponse putConfigurationDynamic(String contentType, Object body) {
         return null;
     }
 

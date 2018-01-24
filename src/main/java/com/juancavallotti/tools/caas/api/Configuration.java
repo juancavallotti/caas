@@ -13,6 +13,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 
+import static javax.ws.rs.core.Response.*;
+
 @Path("/configuration")
 public interface Configuration {
   @GET
@@ -52,7 +54,11 @@ public interface Configuration {
   @GET
   @Path("/{application}/{configVersion}/{env}/dynamic/{key}")
   @Produces({
+      "application/xml",
+      "application/csv",
       "application/json",
+      "application/weave",
+      "application/yaml",
       "text/plain"
   })
   @Consumes
@@ -60,12 +66,15 @@ public interface Configuration {
 
   @PUT
   @Path("/{application}/{configVersion}/{env}/dynamic/{key}")
-  @Produces({
+  @Consumes({
       "application/json",
-      "text/plain"
+      "application/xml",
+      "application/weave",
+      "application/yaml",
+      "text/plain",
+      "application/csv"
   })
-  @Consumes
-  PutConfigurationDynamicResponse putConfigurationDynamic(@HeaderParam("Content-Type") String contentType);
+  PutConfigurationDynamicResponse putConfigurationDynamic(@HeaderParam("Content-Type") String contentType, Object entity);
 
   @POST
   @Path("/{application}/{configVersion}/{env}/promote/{toEnv}")
@@ -323,10 +332,46 @@ public interface Configuration {
       return new HeadersFor200();
     }
 
-    public static GetConfigurationDynamicResponse respond200(HeadersFor200 headers) {
-      Response.ResponseBuilder responseBuilder = status(200);
-      responseBuilder = headers.toResponseBuilder(responseBuilder);
-      return new GetConfigurationDynamicResponse(responseBuilder.build());
+    public static GetConfigurationDynamicResponse respond200WithApplicationJson(Object entity, HeadersFor200 headers) {
+      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/json");
+      responseBuilder.entity(entity);
+      headers.toResponseBuilder(responseBuilder);
+      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
+    }
+
+    public static GetConfigurationDynamicResponse respond200WithApplicationXml(Object entity, HeadersFor200 headers) {
+      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/xml");
+      responseBuilder.entity(entity);
+      headers.toResponseBuilder(responseBuilder);
+      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
+    }
+
+    public static GetConfigurationDynamicResponse respond200WithApplicationWeave(Object entity, HeadersFor200 headers) {
+      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/weave");
+      responseBuilder.entity(entity);
+      headers.toResponseBuilder(responseBuilder);
+      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
+    }
+
+    public static GetConfigurationDynamicResponse respond200WithApplicationYaml(Object entity, HeadersFor200 headers) {
+      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/yaml");
+      responseBuilder.entity(entity);
+      headers.toResponseBuilder(responseBuilder);
+      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
+    }
+
+    public static GetConfigurationDynamicResponse respond200WithTextPlain(Object entity, HeadersFor200 headers) {
+      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "text/plain");
+      responseBuilder.entity(entity);
+      headers.toResponseBuilder(responseBuilder);
+      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
+    }
+
+    public static GetConfigurationDynamicResponse respond200WithApplicationCsv(Object entity, HeadersFor200 headers) {
+      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/csv");
+      responseBuilder.entity(entity);
+      headers.toResponseBuilder(responseBuilder);
+      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
     }
 
     public static GetConfigurationDynamicResponse respond400WithApplicationJson(Object entity) {
