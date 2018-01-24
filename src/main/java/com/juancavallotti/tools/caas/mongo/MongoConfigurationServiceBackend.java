@@ -3,6 +3,7 @@ package com.juancavallotti.tools.caas.mongo;
 import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.api.ConfigurationElement;
 import com.juancavallotti.tools.caas.api.Document;
+import com.juancavallotti.tools.caas.api.DocumentData;
 import com.juancavallotti.tools.caas.mongo.model.MongoDocument;
 import com.juancavallotti.tools.caas.mongo.model.MongoDocumentData;
 import com.juancavallotti.tools.caas.mongo.model.MongoConfigurationElement;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -111,8 +113,39 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     }
 
     @Override
-    public Document getDocument(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException {
-        return null;
+    public DocumentData getDocumentData(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException {
+
+        MongoConfigurationElement config = findWithCoordinate(coordinate);
+
+        if (config == null) {
+            throwConfigNotFound();
+        }
+
+        //if the document already exists, update the data
+        Document doc = findDocument(config, documentName);
+
+        if (doc == null) {
+            throwDocNotFound(documentName);
+        }
+
+        MongoDocumentData mongoData = dataRepository.findByAppIdAndKey(config.getId(), documentName);
+
+        if (mongoData == null) {
+            throwDocNotFound(documentName + " data");
+        }
+
+        //return an annon object, we don't need more than that.
+        return new DocumentData() {
+            @Override
+            public Document getDocument() {
+                return doc;
+            }
+
+            @Override
+            public InputStream getData() {
+                return new ByteArrayInputStream(mongoData.getData());
+            }
+        };
     }
 
     @Override
@@ -133,7 +166,7 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     }
 
 
-    //utility methdod
+    //utility methdods
     public MongoConfigurationElement findWithCoordinate(ConfigCoordinate coordinate) {
         return repository.findByApplicationIgnoreCaseAndVersionAndEnvironmentIgnoreCase(
                 coordinate.getApplication(),
@@ -145,6 +178,13 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     private void throwConfigNotFound() throws ConfigurationServiceBackendException {
         throw ConfigurationServiceBackendException.builder()
                 .setMessage("Config not found")
+                .setCauseType(ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND)
+                .build();
+    }
+
+    private void throwDocNotFound(String name) throws ConfigurationServiceBackendException {
+        throw ConfigurationServiceBackendException.builder()
+                .setMessage("Document not found: " + name)
                 .setCauseType(ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND)
                 .build();
     }

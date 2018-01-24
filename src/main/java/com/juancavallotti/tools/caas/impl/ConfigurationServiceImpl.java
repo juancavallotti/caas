@@ -3,6 +3,7 @@ package com.juancavallotti.tools.caas.impl;
 import com.juancavallotti.tools.caas.api.Configuration;
 import com.juancavallotti.tools.caas.api.DefaultConfigCoordinate;
 import com.juancavallotti.tools.caas.api.DefaultConfigurationElement;
+import com.juancavallotti.tools.caas.api.DocumentData;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.slf4j.Logger;
@@ -67,8 +68,24 @@ public class ConfigurationServiceImpl implements Configuration {
     }
 
     @Override
-    public GetConfigurationDynamicResponse getConfigurationDynamic() {
-        return null;
+    public GetConfigurationDynamicResponse getConfigurationDynamic(String app, String version, String env, String key) {
+
+        DefaultConfigCoordinate coordinate = new DefaultConfigCoordinate();
+        coordinate.setApplication(app);
+        coordinate.setEnvironment(env);
+        coordinate.setVersion(version);
+
+        try {
+            DocumentData data = backend.getDocumentData(coordinate, key);
+            return GetConfigurationDynamicResponse.respond200WithContentType(data.getData(), data.getDocument().getType());
+        } catch (ConfigurationServiceBackendException e) {
+            switch (e.getCauseType()) {
+                case ENTITY_NOT_FOUND:
+                    return GetConfigurationDynamicResponse.respond404WithTextPlain(e.getMessage());
+                default:
+                    return GetConfigurationDynamicResponse.respond500();
+            }
+        }
     }
 
     @Override

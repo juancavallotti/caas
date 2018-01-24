@@ -1,9 +1,6 @@
 package com.juancavallotti.tools.caas.git;
 
-import com.juancavallotti.tools.caas.api.ConfigCoordinate;
-import com.juancavallotti.tools.caas.api.DefaultConfigCoordinate;
-import com.juancavallotti.tools.caas.api.ConfigurationElement;
-import com.juancavallotti.tools.caas.api.Document;
+import com.juancavallotti.tools.caas.api.*;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.eclipse.jgit.api.Git;
@@ -96,7 +93,7 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
     }
 
     @Override
-    public Document getDocument(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException {
+    public DocumentData getDocumentData(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException {
         return null;
     }
 

@@ -57,7 +57,12 @@ public interface Configuration {
       "text/plain"
   })
   @Consumes
-  GetConfigurationDynamicResponse getConfigurationDynamic();
+  GetConfigurationDynamicResponse getConfigurationDynamic(
+          @PathParam("application") String application,
+          @PathParam("configVersion") String version,
+          @PathParam("env") String environment,
+          @PathParam("key") String key
+  );
 
   @PUT
   @Path("/{application}/{configVersion}/{env}/dynamic/{key}")
@@ -333,47 +338,14 @@ public interface Configuration {
       return new HeadersFor200();
     }
 
-    public static GetConfigurationDynamicResponse respond200WithApplicationJson(Object entity, HeadersFor200 headers) {
-      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/json");
+    public static GetConfigurationDynamicResponse respond200WithContentType(Object entity, String contentType) {
+      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", contentType);
       responseBuilder.entity(entity);
+      HeadersFor200 headers = headersFor200();
       headers.toResponseBuilder(responseBuilder);
       return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
     }
 
-    public static GetConfigurationDynamicResponse respond200WithApplicationXml(Object entity, HeadersFor200 headers) {
-      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/xml");
-      responseBuilder.entity(entity);
-      headers.toResponseBuilder(responseBuilder);
-      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
-    }
-
-    public static GetConfigurationDynamicResponse respond200WithApplicationWeave(Object entity, HeadersFor200 headers) {
-      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/weave");
-      responseBuilder.entity(entity);
-      headers.toResponseBuilder(responseBuilder);
-      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
-    }
-
-    public static GetConfigurationDynamicResponse respond200WithApplicationYaml(Object entity, HeadersFor200 headers) {
-      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/yaml");
-      responseBuilder.entity(entity);
-      headers.toResponseBuilder(responseBuilder);
-      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
-    }
-
-    public static GetConfigurationDynamicResponse respond200WithTextPlain(Object entity, HeadersFor200 headers) {
-      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "text/plain");
-      responseBuilder.entity(entity);
-      headers.toResponseBuilder(responseBuilder);
-      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
-    }
-
-    public static GetConfigurationDynamicResponse respond200WithApplicationCsv(Object entity, HeadersFor200 headers) {
-      Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/csv");
-      responseBuilder.entity(entity);
-      headers.toResponseBuilder(responseBuilder);
-      return new GetConfigurationDynamicResponse(responseBuilder.build(), entity);
-    }
 
     public static GetConfigurationDynamicResponse respond400WithApplicationJson(Object entity) {
       Response.ResponseBuilder responseBuilder = status(400).header("Content-Type", "application/json");
