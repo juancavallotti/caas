@@ -47,10 +47,9 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     public ConfigCoordinate createNewConfiguration(ConfigurationElement element) throws ConfigurationServiceBackendException {
 
         if (element.getDocuments() != null && !element.getDocuments().isEmpty()) {
-            throw ConfigurationServiceBackendException.builder()
-                    .setMessage("Configuration cannot have parents")
-                    .setCauseType(ConfigurationServiceBackendException.ExceptionCause.VALIDATION)
-                    .build();
+
+            throwWithMessageAndCause("Configuration cannot have documents",
+                    ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
         }
 
         MongoConfigurationElement existing = repository
@@ -61,11 +60,17 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
                 );
 
         if (existing != null) {
-            throw ConfigurationServiceBackendException.builder()
-                    .setMessage("Configuration already exists with the same coordinates")
-                    .setCauseType(ConfigurationServiceBackendException.ExceptionCause.VALIDATION)
-                    .build();
+            throwWithMessageAndCause("Configuration already exists with the same coordinates",
+                    ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
         }
+
+        //check the parents exist
+        for(ConfigCoordinate parent : element.getParents()) {
+            if (findWithCoordinate(parent) == null)
+                throwWithMessageAndCause("Parent not found",
+                        ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
+        }
+
 
         repository.save(MongoConfigurationElement.fromConfigurationElement(element));
         return element;
@@ -134,7 +139,7 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
             throwDocNotFound(documentName + " data");
         }
 
-        //return an annon object, we don't need more than that.
+        //return an annonimous  object, we don't need more than that.
         return new DocumentData() {
             @Override
             public Document getDocument() {
@@ -176,17 +181,12 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     }
 
     private void throwConfigNotFound() throws ConfigurationServiceBackendException {
-        throw ConfigurationServiceBackendException.builder()
-                .setMessage("Config not found")
-                .setCauseType(ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND)
-                .build();
+
+        throwWithMessageAndCause("Config not found", ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND);
     }
 
     private void throwDocNotFound(String name) throws ConfigurationServiceBackendException {
-        throw ConfigurationServiceBackendException.builder()
-                .setMessage("Document not found: " + name)
-                .setCauseType(ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND)
-                .build();
+        throwWithMessageAndCause("Document not found: " + name , ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND);
     }
 
     private byte[] readDocumentData(InputStream stream) throws ConfigurationServiceBackendException {
@@ -199,6 +199,13 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
                     .setCauseType(ConfigurationServiceBackendException.ExceptionCause.INTERNAL_ERROR)
                     .build();
         }
+    }
+
+    private void throwWithMessageAndCause(String message, ConfigurationServiceBackendException.ExceptionCause cause) throws ConfigurationServiceBackendException{
+        throw ConfigurationServiceBackendException.builder()
+                .setMessage(message)
+                .setCauseType(cause)
+                .build();
     }
 
     private Document findDocument(MongoConfigurationElement element, String key) {
