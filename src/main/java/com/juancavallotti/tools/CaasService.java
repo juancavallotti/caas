@@ -10,6 +10,9 @@ public class CaasService {
     private static final Logger logger = LoggerFactory.getLogger(CaasService.class);
 
     public static void main(String[] args) {
+
+        logger.info("Starting CaaS Service...");
+
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
 

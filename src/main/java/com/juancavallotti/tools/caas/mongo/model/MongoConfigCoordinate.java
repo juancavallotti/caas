@@ -1,7 +1,9 @@
 package com.juancavallotti.tools.caas.mongo.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MongoConfigCoordinate implements ConfigCoordinate {
     private String application;
     private String version;

@@ -29,14 +29,14 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
 
         logger.debug("Repository class is: {}", repository.getClass().getName());
 
-        Iterable<MongoConfigurationElement> coordinates = repository.findAll();
+//        Iterable<MongoConfigurationElement> coordinates = repository.findAll();
+//
+//        List<ConfigCoordinate> ret = new LinkedList<>();
+//        coordinates.forEach((c) -> {
+//            ret.add(standardizeProps(c));
+//        });
 
-        List<ConfigCoordinate> ret = new LinkedList<>();
-        coordinates.forEach((c) -> {
-            ret.add(standardizeProps(c));
-        });
-
-        return ret;
+        return (List) repository.findAllCoordinates();
     }
 
     @Override
@@ -49,6 +49,20 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
                     .build();
         }
 
+        MongoConfigurationElement existing = repository
+                .findByApplicationIgnoreCaseAndVersionAndEnvironmentIgnoreCase(
+                        element.getApplication(),
+                        element.getVersion(),
+                        element.getEnvironment()
+                );
+
+        if (existing != null) {
+            throw ConfigurationServiceBackendException.builder()
+                    .setMessage("Configuration already exists with the same coordinates")
+                    .setCauseType(ConfigurationServiceBackendException.ExceptionCause.VALIDATION)
+                    .build();
+        }
+        
         repository.save(MongoConfigurationElement.fromConfigurationElement(element));
         return element;
     }
@@ -56,7 +70,7 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     @Override
     public ConfigurationElement findConfiguration(String application, String environment, String version) throws ConfigurationServiceBackendException {
 
-        MongoConfigurationElement ret = repository.findByApplicationAndVersionAndEnvironment(application, environment, version);
+        MongoConfigurationElement ret = repository.findByApplicationIgnoreCaseAndVersionAndEnvironmentIgnoreCase(application, environment, version);
 
         if (ret == null) {
             throw ConfigurationServiceBackendException.builder()
