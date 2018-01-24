@@ -1,0 +1,57 @@
+group 'com.juancavallotti.tools'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.9
+
+repositories {
+    mavenCentral()
+}
+
+
+//versions of libraries
+def logj4version = '2.9.1'
+def springBootVersion = '1.5.8.RELEASE'
+
+dependencies {
+
+    //libraries
+
+
+    //logging
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: logj4version
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: logj4version
+    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: logj4version
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: logj4version
+    compile group: 'com.lmax', name: 'disruptor', version: '3.3.7'
+
+    //spring boot framework
+    compile (group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion) {
+        exclude group: 'ch.qos.logback'
+    }
+
+    //serve static web resources
+    compile (group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion) {
+        exclude group: 'ch.qos.logback'
+    }
+
+
+    //jgit for git backend
+    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.9.0.201710071750-r'
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+
+apply plugin: 'application'
+
+//the main class for the application plugin.
+mainClassName = 'com.juancavallotti.tools.CaasService'
+
+//default jvm arguments
+applicationDefaultJvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-modules', 'java.xml.bind',
+        '-Dconfig.location=file:conf/config.properties'
+]
