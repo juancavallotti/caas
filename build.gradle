@@ -38,9 +38,7 @@ dependencies {
     }
 
     //specific to the mongo provider org.springframework.data:spring-data-mongodb:2.0.2.RELEASE
-    compile(group: 'org.springframework.data', name: 'spring-data-mongodb', version: '2.0.2.RELEASE') {
-        exclude(group: 'org.springframework')
-    }
+    compile(group: 'org.springframework.data', name: 'spring-data-mongodb', version: '1.10.9.RELEASE')
 
     //jgit for git backend
     compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.9.0.201710071750-r'
@@ -58,5 +56,6 @@ mainClassName = 'com.juancavallotti.tools.CaasService'
 applicationDefaultJvmArgs = [
         '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
         '--add-modules', 'java.xml.bind',
-        '-Dconfig.location=file:conf/config.properties'
+        '-Dconfig.location=file:conf/config.properties',
+        '--illegal-access=warn'
 ]
