@@ -4,3 +4,5 @@ out/
 gradlew
 gradlew.bat
 .DS_Store
+.idea/
+*.iml
