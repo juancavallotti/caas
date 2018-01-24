@@ -3,13 +3,7 @@ package com.juancavallotti.tools.caas.api;
 import java.lang.Object;
 import java.lang.String;
 import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 
@@ -39,7 +33,7 @@ public interface Configuration {
       "text/plain"
   })
   @Consumes
-  GetAppConfigurationResponse getApplicationConfiguration();
+  GetAppConfigurationResponse getApplicationConfiguration(@PathParam("application") String application, @PathParam("configVersion") String version, @PathParam("env") String environment);
 
   @POST
   @Path("/{application}/{configVersion}/{env}")
@@ -201,10 +195,10 @@ public interface Configuration {
       super(response);
     }
 
-    public static GetConfigurationResponse respond200WithApplicationJson(ConfigurationElement entity) {
+    public static GetAppConfigurationResponse respond200WithApplicationJson(ConfigurationElement entity) {
       Response.ResponseBuilder responseBuilder = status(200).header("Content-Type", "application/json");
       responseBuilder.entity(entity);
-      return new GetConfigurationResponse(responseBuilder.build(), entity);
+      return new GetAppConfigurationResponse(responseBuilder.build(), entity);
     }
 
     public static GetConfigurationResponse respond400WithApplicationJson(Object entity) {
@@ -228,10 +222,10 @@ public interface Configuration {
       return new GetConfigurationResponse(responseBuilder.build());
     }
 
-    public static GetConfigurationResponse respond404WithTextPlain(Object entity) {
+    public static GetAppConfigurationResponse respond404WithTextPlain(Object entity) {
       Response.ResponseBuilder responseBuilder = status(404).header("Content-Type", "text/plain");
       responseBuilder.entity(entity);
-      return new GetConfigurationResponse(responseBuilder.build(), entity);
+      return new GetAppConfigurationResponse(responseBuilder.build(), entity);
     }
   }
 

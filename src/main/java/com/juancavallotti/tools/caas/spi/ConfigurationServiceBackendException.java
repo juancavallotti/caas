@@ -6,7 +6,8 @@ public class ConfigurationServiceBackendException extends Exception {
 
     public static enum ExceptionCause {
         VALIDATION,
-        INTERNAL_ERROR
+        INTERNAL_ERROR,
+        ENTITY_NOT_FOUND
     }
 
     ConfigurationServiceBackendException(String message, Throwable cause, ExceptionCause causeType) {

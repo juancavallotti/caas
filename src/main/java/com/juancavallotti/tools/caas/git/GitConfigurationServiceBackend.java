@@ -88,6 +88,11 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
         return null;
     }
 
+    @Override
+    public ConfigurationElement findConfiguration(String application, String environment, String version) throws ConfigurationServiceBackendException {
+        return null;
+    }
+
     private void populateWithFiles(Collection<String> container, String ref) {
         try {
             Ref r = git.checkout().setName(ref).call();

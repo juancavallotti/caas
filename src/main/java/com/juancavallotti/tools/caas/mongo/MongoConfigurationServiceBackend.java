@@ -33,8 +33,7 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
 
         List<ConfigCoordinate> ret = new LinkedList<>();
         coordinates.forEach((c) -> {
-            c.setProperties(c.getProperties().standardize());
-            ret.add(c);
+            ret.add(standardizeProps(c));
         });
 
         return ret;
@@ -52,5 +51,25 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
 
         repository.save(MongoConfigurationElement.fromConfigurationElement(element));
         return element;
+    }
+
+    @Override
+    public ConfigurationElement findConfiguration(String application, String environment, String version) throws ConfigurationServiceBackendException {
+
+        MongoConfigurationElement ret = repository.findByApplicationAndVersionAndEnvironment(application, environment, version);
+
+        if (ret == null) {
+            throw ConfigurationServiceBackendException.builder()
+                    .setMessage("Config not found")
+                    .setCauseType(ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND)
+                    .build();
+        }
+
+        return standardizeProps(ret);
+    }
+
+    private ConfigurationElement standardizeProps(MongoConfigurationElement elm) {
+        elm.setProperties(elm.getProperties().standardize());
+        return elm;
     }
 }

@@ -50,8 +50,12 @@ public class ConfigurationServiceImpl implements Configuration {
     }
 
     @Override
-    public GetAppConfigurationResponse getApplicationConfiguration() {
-        return null;
+    public GetAppConfigurationResponse getApplicationConfiguration(String app, String env, String version) {
+        try {
+            return GetAppConfigurationResponse.respond200WithApplicationJson(backend.findConfiguration(app, env, version));
+        } catch (ConfigurationServiceBackendException ex) {
+            return GetAppConfigurationResponse.respond404WithTextPlain("Not Found");
+        }
     }
 
     @Override

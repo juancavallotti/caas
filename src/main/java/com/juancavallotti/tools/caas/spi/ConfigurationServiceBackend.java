@@ -15,4 +15,5 @@ public interface ConfigurationServiceBackend {
 
     public ConfigCoordinate createNewConfiguration(ConfigurationElement element) throws ConfigurationServiceBackendException;
 
+    ConfigurationElement findConfiguration(String application, String environment, String version) throws ConfigurationServiceBackendException;
 }

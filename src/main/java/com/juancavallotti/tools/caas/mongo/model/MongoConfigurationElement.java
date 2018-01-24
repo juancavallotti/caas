@@ -1,5 +1,6 @@
 package com.juancavallotti.tools.caas.mongo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.api.ConfigurationElement;
 import org.springframework.data.annotation.Id;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 public class MongoConfigurationElement extends MongoConfigCoordinate implements ConfigurationElement {
 
     @Id
+    @JsonIgnore //not the best but we embrace jackson... for now
     private String id;
 
     private List<ConfigCoordinate> parents;
