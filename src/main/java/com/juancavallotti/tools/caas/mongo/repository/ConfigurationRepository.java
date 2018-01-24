@@ -1,8 +1,8 @@
 package com.juancavallotti.tools.caas.mongo.repository;
 
-import com.juancavallotti.tools.caas.mongo.model.MongoConfigCoordinate;
+import com.juancavallotti.tools.caas.mongo.model.MongoConfigurationElement;
 
-import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.CrudRepository;
 
-public interface ConfigurationRepository extends Repository<MongoConfigCoordinate, String> {
+public interface ConfigurationRepository extends CrudRepository<MongoConfigurationElement, String> {
 }

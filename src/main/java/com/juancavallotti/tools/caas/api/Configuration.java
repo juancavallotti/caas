@@ -24,7 +24,7 @@ public interface Configuration {
 
   @POST
   @Consumes("application/json")
-  PostConfigurationResponse postConfiguration(ConfigurationElement entity);
+  PostConfigurationResponse postConfiguration(DefaultConfigurationElement entity);
 
   @POST
   @Path("/{application}/{configVersion}/copy/{toVersion}")

@@ -1,8 +1,10 @@
 package com.juancavallotti.tools.caas.api;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.lang.String;
 
-public class DocumentImpl implements Document {
+public class DefaultDocument implements Document {
   private String key;
 
   private String type;

@@ -25,6 +25,8 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: logj4version
     compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: logj4version
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: logj4version
+    compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
+
     compile group: 'com.lmax', name: 'disruptor', version: '3.3.7'
 
     //spring boot framework

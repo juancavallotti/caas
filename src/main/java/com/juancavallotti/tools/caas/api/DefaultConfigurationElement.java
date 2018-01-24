@@ -1,9 +1,12 @@
 package com.juancavallotti.tools.caas.api;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.lang.String;
+import java.util.HashMap;
 import java.util.List;
 
-public class ConfigurationElementImpl implements ConfigurationElement {
+public class DefaultConfigurationElement implements ConfigurationElement {
   private String application;
 
   private String version;
@@ -64,6 +67,6 @@ public class ConfigurationElementImpl implements ConfigurationElement {
     this.documents = documents;
   }
 
-  public static class PropertiesTypeImpl implements ConfigurationElement.PropertiesType {
+  public static class DefaultPropertiesType extends HashMap<String, String> implements ConfigurationElement.PropertiesType {
   }
 }

@@ -1,8 +1,10 @@
 package com.juancavallotti.tools.caas.git;
 
 import com.juancavallotti.tools.caas.api.ConfigCoordinate;
-import com.juancavallotti.tools.caas.api.ConfigCoordinateImpl;
+import com.juancavallotti.tools.caas.api.DefaultConfigCoordinate;
+import com.juancavallotti.tools.caas.api.ConfigurationElement;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
+import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -10,7 +12,6 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
@@ -72,7 +73,7 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
             files.forEach((String fileName) -> {
 
                 //we already know the version.
-                ConfigCoordinateImpl cc = new ConfigCoordinateImpl();
+                DefaultConfigCoordinate cc = new DefaultConfigCoordinate();
                 cc.setVersion(version);
                 parseCoordinateDetails(fileName, cc);
                 ret.add(cc);
@@ -80,6 +81,11 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
         });
 
         return ret;
+    }
+
+    @Override
+    public ConfigCoordinate createNewConfiguration(ConfigurationElement element) throws ConfigurationServiceBackendException {
+        return null;
     }
 
     private void populateWithFiles(Collection<String> container, String ref) {

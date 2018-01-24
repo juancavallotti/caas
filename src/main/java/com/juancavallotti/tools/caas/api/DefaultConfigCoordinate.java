@@ -2,7 +2,7 @@ package com.juancavallotti.tools.caas.api;
 
 import java.lang.String;
 
-public class ConfigCoordinateImpl implements ConfigCoordinate {
+public class DefaultConfigCoordinate implements ConfigCoordinate {
   private String application;
 
   private String version;

@@ -1,15 +1,8 @@
 package com.juancavallotti.tools.caas.mongo.model;
 
 import com.juancavallotti.tools.caas.api.ConfigCoordinate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "configurations")
 public class MongoConfigCoordinate implements ConfigCoordinate {
-
-    @Id
-    private String id;
-
     private String application;
     private String version;
     private String environment;
@@ -44,11 +37,14 @@ public class MongoConfigCoordinate implements ConfigCoordinate {
         this.environment = environment;
     }
 
-    public String getId() {
-        return id;
+    protected static MongoConfigCoordinate fromConfigCoordinate(MongoConfigCoordinate target, ConfigCoordinate source) {
+        target.setApplication(source.getApplication());
+        target.setEnvironment(source.getEnvironment());
+        target.setVersion(source.getVersion());
+        return target;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public static MongoConfigCoordinate fromCoordinate(ConfigCoordinate source) {
+        return fromConfigCoordinate(new MongoConfigCoordinate(), source);
     }
 }
