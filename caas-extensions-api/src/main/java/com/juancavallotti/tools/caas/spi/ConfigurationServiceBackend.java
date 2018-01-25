@@ -10,8 +10,12 @@ import java.util.List;
 
 public interface ConfigurationServiceBackend {
 
-    default String serviceName(String name) {
-        return "CaaS Service Implementation: " + name;
+    default String printServiceName() {
+        return "CaaS Service Implementation: " + getServiceName();
+    }
+
+    default String getServiceName() {
+        return getClass().getName();
     }
 
     List<ConfigCoordinate> listConfigurations();

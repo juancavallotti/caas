@@ -32,7 +32,7 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     private DocumentDataRepository dataRepository;
 
     public MongoConfigurationServiceBackend() {
-        logger.info(serviceName("Mongo"));
+        logger.info(printServiceName());
     }
 
     @Override

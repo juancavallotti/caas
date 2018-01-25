@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.util.StringUtils;
 
 import java.util.ServiceLoader;
 
@@ -28,6 +29,9 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
     @Value("${config.location:"+ DEFAULT_CONFIG_LOCATION +"}")
     private String configLocation;
 
+    @Value("${runtime.backend:}")
+    private String backend;
+
     @Override
     public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
         logger.info("CaaS Service is Running");
@@ -39,12 +43,29 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
 
     @Bean
     public ConfigurationServiceBackend findBackend() {
+
         ServiceLoader<ConfigurationServiceBackend> sl = ServiceLoader.load(ConfigurationServiceBackend.class);
 
+        if (StringUtils.isEmpty(backend)) {
+            return sl.findFirst().get();
+        }
 
-        //TODO - Be able to load backends based on configuration.
+        //get named backend.
+        ServiceLoader.Provider<ConfigurationServiceBackend> ret = sl.stream()
+                .filter(provider -> backend.equals(provider.type().getName()))
+                .findFirst().orElse(null);
 
-        return sl.findFirst().get();
+        if (ret != null) {
+            return ret.get();
+        }
+
+        logger.error("Backend {} not found.", backend);
+        logger.error("Available backends are:");
+
+        sl.stream().forEach(backend -> logger.error("\t{}", backend.type().getName()));
+
+        throw new RuntimeException("No suitable backend found.");
+
     }
 
 }

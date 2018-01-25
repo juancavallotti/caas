@@ -32,7 +32,7 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
     private File repoDir;
 
     public GitConfigurationServiceBackend() {
-        logger.info(serviceName("Git"));
+        logger.info(getServiceName());
     }
 
     @PostConstruct
