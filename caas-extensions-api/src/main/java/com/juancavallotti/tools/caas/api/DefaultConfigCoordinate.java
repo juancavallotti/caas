@@ -2,6 +2,9 @@ package com.juancavallotti.tools.caas.api;
 
 import java.lang.String;
 
+/**
+ * Default pojos should make module developer's life easier.
+ */
 public class DefaultConfigCoordinate implements ConfigCoordinate {
   private String application;
 

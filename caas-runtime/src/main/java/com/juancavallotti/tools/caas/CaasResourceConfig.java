@@ -1,9 +1,8 @@
-package com.juancavallotti.tools;
+package com.juancavallotti.tools.caas;
 
 import com.juancavallotti.tools.caas.impl.ConfigurationServiceImpl;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.ApplicationPath;

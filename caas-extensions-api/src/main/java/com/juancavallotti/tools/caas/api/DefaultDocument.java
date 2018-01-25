@@ -1,9 +1,10 @@
 package com.juancavallotti.tools.caas.api;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import java.lang.String;
 
+/**
+ * Default pojos should make module developer's life easier.
+ */
 public class DefaultDocument implements Document {
   private String key;
 

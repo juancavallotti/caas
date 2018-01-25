@@ -1,4 +1,4 @@
-package com.juancavallotti.tools;
+package com.juancavallotti.tools.caas;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

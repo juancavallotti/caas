@@ -1,6 +1,7 @@
 package com.juancavallotti.tools.caas.api;
 
-import com.juancavallotti.tools.jaxrs.ext.PATCH;
+import com.juancavallotti.tools.caas.api.DefaultConfigurationElement;
+import com.juancavallotti.tools.caas.jaxrs.ext.PATCH;
 
 import java.io.InputStream;
 import java.lang.Object;

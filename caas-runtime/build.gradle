@@ -1,0 +1,49 @@
+
+dependencies {
+
+    //libraries
+    compile project(':caas-extensions-api')
+
+    //logging
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: logj4version
+    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: logj4version
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: logj4version
+    compile group: 'org.slf4j', name: 'jul-to-slf4j', version: slf4jVersion
+
+    //for async logging
+    compile group: 'com.lmax', name: 'disruptor', version: '3.3.7'
+
+    //some utilities
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+
+    //spring boot framework
+    compile (group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion) {
+        exclude group: 'ch.qos.logback'
+    }
+
+    //serve static web resources
+    compile (group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion) {
+        exclude group: 'ch.qos.logback'
+    }
+
+    //specific to the mongo provider org.springframework.data:spring-data-mongodb:2.0.2.RELEASE
+    compile(group: 'org.springframework.data', name: 'spring-data-mongodb', version: '1.10.9.RELEASE')
+
+    //jgit for git backend
+    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.9.0.201710071750-r'
+
+}
+
+
+apply plugin: 'application'
+
+//the main class for the application plugin.
+mainClassName = 'com.juancavallotti.tools.caas.CaasService'
+
+//default jvm arguments
+applicationDefaultJvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-modules', 'java.xml.bind',
+        '-Dconfig.location=file:conf/config.properties',
+        '--illegal-access=warn'
+]

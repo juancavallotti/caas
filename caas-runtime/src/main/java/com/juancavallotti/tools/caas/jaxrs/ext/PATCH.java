@@ -1,4 +1,4 @@
-package com.juancavallotti.tools.jaxrs.ext;
+package com.juancavallotti.tools.caas.jaxrs.ext;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.NameBinding;

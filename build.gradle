@@ -1,67 +1,44 @@
-group 'com.juancavallotti.tools'
-version '1.0-SNAPSHOT'
+//common settings for all sub projects
+subprojects {
+    group 'com.juancavallotti.tools'
+    version '1.0-SNAPSHOT'
 
-apply plugin: 'java'
+    apply plugin: 'java'
+    sourceCompatibility = 1.9
 
-sourceCompatibility = 1.9
+    repositories {
+        mavenCentral()
+    }
 
-repositories {
-    mavenCentral()
+    ext {
+        //versions of libraries
+        logj4version = '2.9.1'
+        springBootVersion = '1.5.9.RELEASE'
+        springVersion = '5.0.2.RELEASE'
+        slf4jVersion = '1.7.25'
+        jacksonVersion = '2.8.10'
+
+    }
+
+    //some shared dependencies.
+    dependencies {
+        //all modules depend on slf4j-api
+        compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: logj4version
+        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+
+        //we are embracing jackson for the modules to customize how they answer
+        //this allows less bean to bean mapping work and the api is a JSON api anyways.
+        //I just hope I don't have to change jackson to another mapper :)
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+
+        //all modules depend on junit
+        testCompile group: 'junit', name: 'junit', version: '4.11'
+    }
+
+
 }
 
 
-//versions of libraries
-def logj4version = '2.9.1'
-def springBootVersion = '1.5.9.RELEASE'
-def springVersion = '5.0.2.RELEASE'
-
-dependencies {
-
-    //libraries
 
 
-    //logging
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: logj4version
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: logj4version
-    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: logj4version
-    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: logj4version
-    compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
-
-    //for async logging
-    compile group: 'com.lmax', name: 'disruptor', version: '3.3.7'
-
-    //some utilities
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-
-    //spring boot framework
-    compile (group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion) {
-        exclude group: 'ch.qos.logback'
-    }
-
-    //serve static web resources
-    compile (group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion) {
-        exclude group: 'ch.qos.logback'
-    }
-
-    //specific to the mongo provider org.springframework.data:spring-data-mongodb:2.0.2.RELEASE
-    compile(group: 'org.springframework.data', name: 'spring-data-mongodb', version: '1.10.9.RELEASE')
-
-    //jgit for git backend
-    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.9.0.201710071750-r'
-
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-}
-
-
-apply plugin: 'application'
-
-//the main class for the application plugin.
-mainClassName = 'com.juancavallotti.tools.CaasService'
-
-//default jvm arguments
-applicationDefaultJvmArgs = [
-        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-        '--add-modules', 'java.xml.bind',
-        '-Dconfig.location=file:conf/config.properties',
-        '--illegal-access=warn'
-]

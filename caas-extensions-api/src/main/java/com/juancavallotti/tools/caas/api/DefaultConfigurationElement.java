@@ -1,11 +1,12 @@
 package com.juancavallotti.tools.caas.api;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import java.lang.String;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Default pojos should make module developer's life easier.
+ */
 public class DefaultConfigurationElement implements ConfigurationElement {
   private String application;
 
