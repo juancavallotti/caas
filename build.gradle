@@ -14,10 +14,9 @@ subprojects {
         //versions of libraries
         logj4version = '2.9.1'
         springBootVersion = '1.5.9.RELEASE'
-        springVersion = '5.0.2.RELEASE'
         slf4jVersion = '1.7.25'
         jacksonVersion = '2.8.10'
-
+        springVersion = '4.3.13.RELEASE'
     }
 
     //some shared dependencies.
@@ -31,6 +30,9 @@ subprojects {
         //I just hope I don't have to change jackson to another mapper :)
         compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
         compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+
+        //all modules may want some annotations
+        compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
 
         //all modules depend on junit
         testCompile group: 'junit', name: 'junit', version: '4.11'

@@ -1,0 +1,12 @@
+dependencies {
+    //libraries
+    compile project(':caas-extensions-api')
+
+    //jgit for git backend
+    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.9.0.201710071750-r'
+
+    //spring
+    compile group: 'org.springframework', name: 'spring-core', version: springVersion
+    compile group: 'org.springframework', name: 'spring-beans', version: springVersion
+
+}

@@ -1,0 +1,17 @@
+
+dependencies {
+    //libraries
+    compile project(':caas-extensions-api')
+
+    //specific to the mongo provider org.springframework.data:spring-data-mongodb:1.10.9.RELEASE
+    compile(group: 'org.springframework.data', name: 'spring-data-mongodb', version: '1.10.9.RELEASE')
+
+    //we use commons-io here too.
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+
+    //spring
+    compile group: 'org.springframework', name: 'spring-core', version: springVersion
+    compile group: 'org.springframework', name: 'spring-beans', version: springVersion
+
+
+}

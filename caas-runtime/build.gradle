@@ -4,6 +4,10 @@ dependencies {
     //libraries
     compile project(':caas-extensions-api')
 
+    //backends
+    compile project(':caas-backend-git')
+    compile project(':caas-backend-mongo')
+
     //logging
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: logj4version
     compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: logj4version
@@ -26,11 +30,7 @@ dependencies {
         exclude group: 'ch.qos.logback'
     }
 
-    //specific to the mongo provider org.springframework.data:spring-data-mongodb:2.0.2.RELEASE
-    compile(group: 'org.springframework.data', name: 'spring-data-mongodb', version: '1.10.9.RELEASE')
 
-    //jgit for git backend
-    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.9.0.201710071750-r'
 
 }
 
