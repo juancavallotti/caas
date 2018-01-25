@@ -13,23 +13,26 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.util.StringUtils;
 
+import java.util.Optional;
 import java.util.ServiceLoader;
 
+
+import static com.juancavallotti.tools.caas.RuntimeProperties.*;
 
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan(basePackages = "com.juancavallotti.tools")
-@PropertySource(value = "${config.location:" + SpringBeansConfig.DEFAULT_CONFIG_LOCATION + " }", ignoreResourceNotFound = false)
+@PropertySource(value = "${"+ CONFIG_LOCATION + ":" + SpringBeansConfig.DEFAULT_CONFIG_LOCATION + " }", ignoreResourceNotFound = false)
 public class SpringBeansConfig implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
     public static final String DEFAULT_CONFIG_LOCATION = "classpath://defaults.properties";
 
     private static final Logger logger = LoggerFactory.getLogger(SpringBeansConfig.class);
 
-    @Value("${config.location:"+ DEFAULT_CONFIG_LOCATION +"}")
+    @Value("${" + CONFIG_LOCATION + ":"+ DEFAULT_CONFIG_LOCATION +"}")
     private String configLocation;
 
-    @Value("${runtime.backend:}")
+    @Value("${"+ RUNTIME_BACKEND +":}")
     private String backend;
 
     @Override
@@ -47,7 +50,19 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
         ServiceLoader<ConfigurationServiceBackend> sl = ServiceLoader.load(ConfigurationServiceBackend.class);
 
         if (StringUtils.isEmpty(backend)) {
-            return sl.findFirst().get();
+
+            Optional<ConfigurationServiceBackend> ret = sl.findFirst();
+
+            if (!ret.isPresent()) {
+                logger.error("There are no backend implementations in the classpath!!");
+                throw new RuntimeException("No present backends in classpath!");
+            }
+
+            logger.info("Selected backend implementation: {}.", ret.get().getServiceName());
+            logger.info("Suitable implementations (configued through '{}') are:", CONFIG_LOCATION);
+            sl.stream().forEach(backend -> logger.info("\t{}", backend.type().getName()));
+
+            return ret.get();
         }
 
         //get named backend.
