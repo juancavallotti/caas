@@ -82,15 +82,6 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
         return ret;
     }
 
-    @Override
-    public ConfigCoordinate createNewConfiguration(ConfigurationElement element) throws ConfigurationServiceBackendException {
-        return null;
-    }
-
-    @Override
-    public Document setDocument(ConfigCoordinate coordinate, String documentName, String contentType, InputStream documentData) throws ConfigurationServiceBackendException {
-        return null;
-    }
 
     @Override
     public DocumentData getDocumentData(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException {
