@@ -1,9 +1,6 @@
 package com.juancavallotti.tools.caas.impl;
 
-import com.juancavallotti.tools.caas.api.Configuration;
-import com.juancavallotti.tools.caas.api.DefaultConfigCoordinate;
-import com.juancavallotti.tools.caas.api.DefaultConfigurationElement;
-import com.juancavallotti.tools.caas.api.DocumentData;
+import com.juancavallotti.tools.caas.api.*;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.slf4j.Logger;
@@ -24,7 +21,17 @@ public class ConfigurationServiceImpl implements Configuration {
     @Override
     public GetConfigurationResponse getConfiguration() {
         logger.debug("Trying to accquire all configs");
-        return GetConfigurationResponse.respond200WithApplicationJson(backend.listConfigurations());
+        try {
+            return GetConfigurationResponse.respond200WithApplicationJson(backend.listConfigurations());
+        } catch (ConfigurationServiceBackendException ex) {
+            switch (ex.getCauseType()) {
+                case OPERATION_NOT_SUPPORTED:
+                    return GetConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
+                default:
+                    return GetConfigurationResponse.respond500();
+            }
+        }
+
     }
 
     @Override
@@ -36,7 +43,9 @@ public class ConfigurationServiceImpl implements Configuration {
         } catch (ConfigurationServiceBackendException ex) {
             switch (ex.getCauseType()) {
                 case VALIDATION:
-                    return PostConfigurationResponse.respond400WithApplicationJson(Map.of("status", ex.getMessage()));
+                    return PostConfigurationResponse.respond400WithApplicationJson(status(ex.getMessage()));
+                case OPERATION_NOT_SUPPORTED:
+                    return PostConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
                 default:
                     return PostConfigurationResponse.respond500();
             }
@@ -70,10 +79,7 @@ public class ConfigurationServiceImpl implements Configuration {
     @Override
     public GetConfigurationDynamicResponse getConfigurationDynamic(String app, String version, String env, String key) {
 
-        DefaultConfigCoordinate coordinate = new DefaultConfigCoordinate();
-        coordinate.setApplication(app);
-        coordinate.setEnvironment(env);
-        coordinate.setVersion(version);
+        ConfigCoordinate coordinate = coordinate(app, version, env);
 
         try {
             DocumentData data = backend.getDocumentData(coordinate, key);
@@ -93,10 +99,7 @@ public class ConfigurationServiceImpl implements Configuration {
 
         logger.debug("Called method to add a document with key: {}, environment: {}, version: {}, key: {}", app, env, version, key);
 
-        DefaultConfigCoordinate coordinate = new DefaultConfigCoordinate();
-        coordinate.setApplication(app);
-        coordinate.setEnvironment(env);
-        coordinate.setVersion(version);
+        ConfigCoordinate coordinate = coordinate(app, version, env);
 
         try {
             backend.setDocument(coordinate, key, contentType, body);
@@ -114,5 +117,19 @@ public class ConfigurationServiceImpl implements Configuration {
     @Override
     public PostConfigurationPromoteResponse postConfigurationPromote() {
         return null;
+    }
+
+
+    private Map<String, String> status(String status) {
+        return Map.of("status", status);
+    }
+
+    private ConfigCoordinate coordinate(String app, String version, String env) {
+        DefaultConfigCoordinate coordinate = new DefaultConfigCoordinate();
+        coordinate.setApplication(app);
+        coordinate.setEnvironment(env);
+        coordinate.setVersion(version);
+
+        return coordinate;
     }
 }
