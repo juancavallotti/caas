@@ -61,8 +61,8 @@ public interface ConfigurationServiceBackend {
      * This is a mandatory operation. All backends must support reading configurations.
      * What would be the purpose of the service otherwise?
      * @param application
-     * @param environment
      * @param version
+     * @param env
      * @return
      * @throws ConfigurationServiceBackendException
      */
@@ -70,13 +70,34 @@ public interface ConfigurationServiceBackend {
 
     /**
      * Update completely an existing configuration.
-     * NOTE: this method must not remove any of the existing documents. If user provides documents
-     * there is the option to ignore them or to throw invalid data exception.
+     * NOTE: this method must remove documents that are not longer required. If user provides new documents
+     * there is the option to ignore them or to throw invalid data exception. So basically, compare the list
+     * of existing documents, if there are some missing, then remove them from the documents catalog.
      *
      * This is an optional operation.
      * @param entity the configuration to update.
      * @return The updated configuration.
      * @throws ConfigurationServiceBackendException
      */
-    ConfigurationElement replaceConfiguration(ConfigurationElement entity) throws ConfigurationServiceBackendException;
+    default ConfigurationElement replaceConfiguration(ConfigurationElement entity) throws ConfigurationServiceBackendException {
+        throw ConfigurationServiceBackendException.notSupported();
+    }
+
+    /**
+     * Update diferentially an existing configuration.
+     * NOTE: this method must not update any of the existing documents. If user provides documents
+     * there is the option to ignore them or to throw invalid data exception.
+     *
+     * This method just creates new properties, or updates existing ones
+     *
+     * This is an optional operation.
+     * @param entity the configuration to update.
+     * @return The updated configuration.
+     * @throws ConfigurationServiceBackendException
+     */
+    default ConfigurationElement patchConfiguration(ConfigurationElement entity) throws ConfigurationServiceBackendException {
+        throw ConfigurationServiceBackendException.notSupported();
+    }
+
+
 }

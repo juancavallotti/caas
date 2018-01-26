@@ -52,7 +52,11 @@ public interface Configuration {
   @PATCH
   @Path("/{application}/{configVersion}/{env}")
   @Consumes("application/json")
-  PatchAppConfigurationResponse patchConfiguration(Object entity);
+  PatchAppConfigurationResponse patchConfiguration(
+          @PathParam("application") String application,
+          @PathParam("configVersion") String version,
+          @PathParam("env") String environment,
+          DefaultConfigurationElement entity);
 
   @GET
   @Path("/{application}/{configVersion}/{env}/dynamic/{key}")

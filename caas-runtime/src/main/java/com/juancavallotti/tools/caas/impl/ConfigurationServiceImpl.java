@@ -69,11 +69,14 @@ public class ConfigurationServiceImpl implements Configuration {
     @Override
     public PutAppConfigurationResponse putConfiguration(String app, String version, String env, DefaultConfigurationElement entity) {
 
-        //user may be sending some values in the jon, we don't want them we want the path params.
+        logger.debug("Called PUT for app config with coordinates {} {} {}", app, version, env);
+
+        //user may be sending some values in the json, we don't want them we want the path params.
         entity = coordinate(app, version, env, entity);
 
         try {
             backend.replaceConfiguration(entity);
+            return PutAppConfigurationResponse.respond202();
         } catch (ConfigurationServiceBackendException ex) {
 
             switch (ex.getCauseType()) {
@@ -86,13 +89,31 @@ public class ConfigurationServiceImpl implements Configuration {
 
             return PutAppConfigurationResponse.respond500();
         }
-
-        return null;
     }
 
     @Override
-    public PatchAppConfigurationResponse patchConfiguration(Object entity) {
-        return null;
+    public PatchAppConfigurationResponse patchConfiguration(String app, String version, String env, DefaultConfigurationElement entity) {
+
+        logger.debug("Called PATCH for app config with coordinates {} {} {}", app, version, env);
+
+        //user may be sending some values in the json, we don't want them we want the path params.
+        entity = coordinate(app, version, env, entity);
+
+        try {
+            backend.patchConfiguration(entity);
+            return PatchAppConfigurationResponse.respond202();
+        } catch (ConfigurationServiceBackendException ex) {
+
+            switch (ex.getCauseType()) {
+                case ENTITY_NOT_FOUND:
+                case VALIDATION:
+                    return PatchAppConfigurationResponse.respond400WithApplicationJson(status(ex.getMessage()));
+                case OPERATION_NOT_SUPPORTED:
+                    return PatchAppConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
+            }
+
+            return PatchAppConfigurationResponse.respond500();
+        }
     }
 
     @Override
