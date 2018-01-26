@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 public class ConfigurationServiceImpl implements Configuration {
@@ -28,6 +29,7 @@ public class ConfigurationServiceImpl implements Configuration {
                 case OPERATION_NOT_SUPPORTED:
                     return GetConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
                 default:
+                    logger.error("Unknown backend exception", ex);
                     return GetConfigurationResponse.respond500();
             }
         }
@@ -47,14 +49,27 @@ public class ConfigurationServiceImpl implements Configuration {
                 case OPERATION_NOT_SUPPORTED:
                     return PostConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
                 default:
+                    logger.error("Unknown backend exception", ex);
                     return PostConfigurationResponse.respond500();
             }
         }
     }
 
     @Override
-    public PostConfigurationCopyResponse postConfigurationCopy() {
-        return null;
+    public PostConfigurationCopyResponse postConfigurationCopy(String app, String version, String targetVersion) {
+        try {
+            List<ConfigurationElement> newElements = backend.createNewVersion(app, version, targetVersion);
+            logger.info("Copy operation finished. New configurations count: {}", newElements.size());
+            return PostConfigurationCopyResponse.respond202();
+        } catch (ConfigurationServiceBackendException ex) {
+            switch (ex.getCauseType()) {
+                case OPERATION_NOT_SUPPORTED:
+                    return PostConfigurationCopyResponse.respond400WithApplicationJson(status("Not supported"));
+                default:
+                    logger.error("Unknown backend exception", ex);
+                    return PostConfigurationCopyResponse.respond500();
+            }
+        }
     }
 
     @Override
@@ -86,7 +101,7 @@ public class ConfigurationServiceImpl implements Configuration {
                 case OPERATION_NOT_SUPPORTED:
                     return PutAppConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
             }
-
+            logger.error("Unknown backend exception", ex);
             return PutAppConfigurationResponse.respond500();
         }
     }
@@ -111,7 +126,7 @@ public class ConfigurationServiceImpl implements Configuration {
                 case OPERATION_NOT_SUPPORTED:
                     return PatchAppConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
             }
-
+            logger.error("Unknown backend exception", ex);
             return PatchAppConfigurationResponse.respond500();
         }
     }
@@ -124,11 +139,12 @@ public class ConfigurationServiceImpl implements Configuration {
         try {
             DocumentData data = backend.getDocumentData(coordinate, key);
             return GetConfigurationDynamicResponse.respond200WithContentType(data.getData(), data.getDocument().getType());
-        } catch (ConfigurationServiceBackendException e) {
-            switch (e.getCauseType()) {
+        } catch (ConfigurationServiceBackendException ex) {
+            switch (ex.getCauseType()) {
                 case ENTITY_NOT_FOUND:
-                    return GetConfigurationDynamicResponse.respond404WithTextPlain(e.getMessage());
+                    return GetConfigurationDynamicResponse.respond404WithTextPlain(ex.getMessage());
                 default:
+                    logger.error("Unknown backend exception", ex);
                     return GetConfigurationDynamicResponse.respond500();
             }
         }
@@ -147,16 +163,34 @@ public class ConfigurationServiceImpl implements Configuration {
         } catch (ConfigurationServiceBackendException ex) {
             switch (ex.getCauseType()) {
                 case ENTITY_NOT_FOUND:
-                    return PutConfigurationDynamicResponse.respond400WithApplicationJson(Map.of("status", ex.getMessage()));
+                    return PutConfigurationDynamicResponse.respond400WithApplicationJson(status(ex.getMessage()));
                 default:
+                    logger.error("Unknown backend exception", ex);
                     return PutConfigurationDynamicResponse.respond500();
             }
         }
     }
 
     @Override
-    public PostConfigurationPromoteResponse postConfigurationPromote() {
-        return null;
+    public PostConfigurationPromoteResponse postConfigurationPromote(String app, String version, String env, String targetEnv) {
+
+        ConfigCoordinate coordinate = coordinate(app, version, env);
+
+        try {
+            backend.promoteConfiguration(coordinate, targetEnv);
+            return PostConfigurationPromoteResponse.respond202();
+        } catch (ConfigurationServiceBackendException ex) {
+            switch (ex.getCauseType()) {
+                case ENTITY_NOT_FOUND:
+                case VALIDATION:
+                    return PostConfigurationPromoteResponse.respond400WithApplicationJson(status(ex.getMessage()));
+                case OPERATION_NOT_SUPPORTED:
+                    return PostConfigurationPromoteResponse.respond400WithApplicationJson(status("Not supported"));
+                default:
+                    logger.error("Unknown backend exception", ex);
+                    return PostConfigurationPromoteResponse.respond500();
+            }
+        }
     }
 
 

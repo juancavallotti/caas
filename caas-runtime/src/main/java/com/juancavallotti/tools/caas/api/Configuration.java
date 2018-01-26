@@ -26,7 +26,11 @@ public interface Configuration {
   @Path("/{application}/{configVersion}/copy/{toVersion}")
   @Produces("application/json")
   @Consumes
-  PostConfigurationCopyResponse postConfigurationCopy();
+  PostConfigurationCopyResponse postConfigurationCopy(
+          @PathParam("application") String application,
+          @PathParam("configVersion") String version,
+          @PathParam("toVersion") String targetVersion
+  );
 
   @GET
   @Path("/{application}/{configVersion}/{env}")
@@ -68,7 +72,6 @@ public interface Configuration {
       "application/yaml",
       "text/plain"
   })
-  @Consumes
   GetConfigurationDynamicResponse getConfigurationDynamic(
           @PathParam("application") String application,
           @PathParam("configVersion") String version,
@@ -98,7 +101,12 @@ public interface Configuration {
   @Path("/{application}/{configVersion}/{env}/promote/{toEnv}")
   @Produces("application/json")
   @Consumes
-  PostConfigurationPromoteResponse postConfigurationPromote();
+  PostConfigurationPromoteResponse postConfigurationPromote(
+          @PathParam("application") String application,
+          @PathParam("configVersion") String version,
+          @PathParam("env") String environment,
+          @PathParam("toEnv") String targetEnvironment
+  );
 
   class GetConfigurationResponse extends ResponseDelegate {
     private GetConfigurationResponse(Response response, Object entity) {

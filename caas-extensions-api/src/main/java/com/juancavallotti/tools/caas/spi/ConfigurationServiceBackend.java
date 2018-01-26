@@ -100,4 +100,32 @@ public interface ConfigurationServiceBackend {
     }
 
 
+    /**
+     * Promote one configuration to a different environment. This is equivalent to creating a brand new setting.
+     * The documents must be copied too.
+     *
+     * This is an optional operation.
+     * @param coordinate
+     * @param targetEnvironment
+     * @return
+     * @throws ConfigurationServiceBackendException
+     */
+    default ConfigurationElement promoteConfiguration(ConfigCoordinate coordinate, String targetEnvironment) throws ConfigurationServiceBackendException {
+        throw ConfigurationServiceBackendException.notSupported();
+    }
+
+    /**
+     * Copy a particular application in all environments to a new version of this application in All environments, whichever
+     * are those environments.
+     *
+     * This is an optional operation.
+     * @param appName
+     * @param version
+     * @param targetVersion
+     * @return
+     * @throws ConfigurationServiceBackendException
+     */
+    default <T extends ConfigurationElement> List<T> createNewVersion(String appName, String version, String targetVersion) throws ConfigurationServiceBackendException {
+        throw ConfigurationServiceBackendException.notSupported();
+    }
 }
