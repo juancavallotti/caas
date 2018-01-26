@@ -154,9 +154,9 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     }
 
     @Override
-    public ConfigurationElement findConfiguration(String application, String environment, String version) throws ConfigurationServiceBackendException {
+    public ConfigurationElement findConfiguration(String application, String version, String environment) throws ConfigurationServiceBackendException {
 
-        MongoConfigurationElement ret = repository.findByApplicationIgnoreCaseAndVersionAndEnvironmentIgnoreCase(application, environment, version);
+        MongoConfigurationElement ret = repository.findByApplicationIgnoreCaseAndVersionAndEnvironmentIgnoreCase(application, version, environment);
 
         if (ret == null) {
             throwConfigNotFound();

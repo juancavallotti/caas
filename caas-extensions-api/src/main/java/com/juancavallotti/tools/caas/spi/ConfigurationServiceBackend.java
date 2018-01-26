@@ -1,9 +1,6 @@
 package com.juancavallotti.tools.caas.spi;
 
-import com.juancavallotti.tools.caas.api.ConfigCoordinate;
-import com.juancavallotti.tools.caas.api.ConfigurationElement;
-import com.juancavallotti.tools.caas.api.Document;
-import com.juancavallotti.tools.caas.api.DocumentData;
+import com.juancavallotti.tools.caas.api.*;
 
 import java.io.InputStream;
 import java.util.List;
@@ -69,5 +66,17 @@ public interface ConfigurationServiceBackend {
      * @return
      * @throws ConfigurationServiceBackendException
      */
-    ConfigurationElement findConfiguration(String application, String environment, String version) throws ConfigurationServiceBackendException;
+    ConfigurationElement findConfiguration(String application, String version, String env) throws ConfigurationServiceBackendException;
+
+    /**
+     * Update completely an existing configuration.
+     * NOTE: this method must not remove any of the existing documents. If user provides documents
+     * there is the option to ignore them or to throw invalid data exception.
+     *
+     * This is an optional operation.
+     * @param entity the configuration to update.
+     * @return The updated configuration.
+     * @throws ConfigurationServiceBackendException
+     */
+    ConfigurationElement replaceConfiguration(ConfigurationElement entity) throws ConfigurationServiceBackendException;
 }

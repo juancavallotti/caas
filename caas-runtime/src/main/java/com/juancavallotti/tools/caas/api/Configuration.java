@@ -35,12 +35,19 @@ public interface Configuration {
       "text/plain"
   })
   @Consumes
-  GetAppConfigurationResponse getApplicationConfiguration(@PathParam("application") String application, @PathParam("configVersion") String version, @PathParam("env") String environment);
+  GetAppConfigurationResponse getApplicationConfiguration(
+          @PathParam("application") String application,
+          @PathParam("configVersion") String version,
+          @PathParam("env") String environment);
 
   @PUT
   @Path("/{application}/{configVersion}/{env}")
   @Consumes("application/json")
-  PutAppConfigurationResponse putConfiguration(Object entity);
+  PutAppConfigurationResponse putConfiguration(
+          @PathParam("application") String application,
+          @PathParam("configVersion") String version,
+          @PathParam("env") String environment,
+          DefaultConfigurationElement entity);
 
   @PATCH
   @Path("/{application}/{configVersion}/{env}")
@@ -251,36 +258,36 @@ public interface Configuration {
       super(response);
     }
 
-    public static PostConfigurationResponse respond202() {
+    public static PutAppConfigurationResponse respond202() {
       Response.ResponseBuilder responseBuilder = status(202);
-      return new PostConfigurationResponse(responseBuilder.build());
+      return new PutAppConfigurationResponse(responseBuilder.build());
     }
 
-    public static PostConfigurationResponse respond400WithApplicationJson(Object entity) {
+    public static PutAppConfigurationResponse respond400WithApplicationJson(Object entity) {
       Response.ResponseBuilder responseBuilder = status(400).header("Content-Type", "application/json");
       responseBuilder.entity(entity);
-      return new PostConfigurationResponse(responseBuilder.build(), entity);
+      return new PutAppConfigurationResponse(responseBuilder.build(), entity);
     }
 
-    public static PostConfigurationResponse respond401() {
+    public static PutAppConfigurationResponse respond401() {
       Response.ResponseBuilder responseBuilder = status(401);
-      return new PostConfigurationResponse(responseBuilder.build());
+      return new PutAppConfigurationResponse(responseBuilder.build());
     }
 
-    public static PostConfigurationResponse respond403() {
+    public static PutAppConfigurationResponse respond403() {
       Response.ResponseBuilder responseBuilder = status(403);
-      return new PostConfigurationResponse(responseBuilder.build());
+      return new PutAppConfigurationResponse(responseBuilder.build());
     }
 
-    public static PostConfigurationResponse respond500() {
+    public static PutAppConfigurationResponse respond500() {
       Response.ResponseBuilder responseBuilder = status(500);
-      return new PostConfigurationResponse(responseBuilder.build());
+      return new PutAppConfigurationResponse(responseBuilder.build());
     }
 
-    public static PostConfigurationResponse respond404WithTextPlain(Object entity) {
+    public static PutAppConfigurationResponse respond404WithTextPlain(Object entity) {
       Response.ResponseBuilder responseBuilder = status(404).header("Content-Type", "text/plain");
       responseBuilder.entity(entity);
-      return new PostConfigurationResponse(responseBuilder.build(), entity);
+      return new PutAppConfigurationResponse(responseBuilder.build(), entity);
     }
   }
 

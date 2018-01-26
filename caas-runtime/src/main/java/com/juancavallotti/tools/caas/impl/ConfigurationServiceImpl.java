@@ -58,16 +58,35 @@ public class ConfigurationServiceImpl implements Configuration {
     }
 
     @Override
-    public GetAppConfigurationResponse getApplicationConfiguration(String app, String env, String version) {
+    public GetAppConfigurationResponse getApplicationConfiguration(String app, String version, String env) {
         try {
-            return GetAppConfigurationResponse.respond200WithApplicationJson(backend.findConfiguration(app, env, version));
+            return GetAppConfigurationResponse.respond200WithApplicationJson(backend.findConfiguration(app, version, env));
         } catch (ConfigurationServiceBackendException ex) {
             return GetAppConfigurationResponse.respond404WithTextPlain("Not Found");
         }
     }
 
     @Override
-    public PutAppConfigurationResponse putConfiguration(Object entity) {
+    public PutAppConfigurationResponse putConfiguration(String app, String version, String env, DefaultConfigurationElement entity) {
+
+        //user may be sending some values in the jon, we don't want them we want the path params.
+        entity = coordinate(app, version, env, entity);
+
+        try {
+            backend.replaceConfiguration(entity);
+        } catch (ConfigurationServiceBackendException ex) {
+
+            switch (ex.getCauseType()) {
+                case ENTITY_NOT_FOUND:
+                case VALIDATION:
+                    return PutAppConfigurationResponse.respond400WithApplicationJson(status(ex.getMessage()));
+                case OPERATION_NOT_SUPPORTED:
+                    return PutAppConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
+            }
+
+            return PutAppConfigurationResponse.respond500();
+        }
+
         return null;
     }
 
@@ -125,11 +144,13 @@ public class ConfigurationServiceImpl implements Configuration {
     }
 
     private ConfigCoordinate coordinate(String app, String version, String env) {
-        DefaultConfigCoordinate coordinate = new DefaultConfigCoordinate();
-        coordinate.setApplication(app);
-        coordinate.setEnvironment(env);
-        coordinate.setVersion(version);
+        return coordinate(app, version, env, new DefaultConfigCoordinate());
+    }
 
-        return coordinate;
+    private <T extends ConfigCoordinate> T coordinate(String app, String version, String env, T target) {
+        target.setApplication(app);
+        target.setVersion(version);
+        target.setEnvironment(env);
+        return target;
     }
 }
