@@ -65,6 +65,8 @@ public class MongoConfigurationElement extends MongoConfigCoordinate implements 
     }
 
 
+
+
     public static MongoConfigurationElement fromConfigurationElement(ConfigurationElement original) {
         MongoConfigurationElement ret = new MongoConfigurationElement();
 
@@ -72,22 +74,15 @@ public class MongoConfigurationElement extends MongoConfigCoordinate implements 
 
         if (original.getDocuments() != null) {
             ret.setDocuments(original
-                    .getDocuments()
-                    .stream()
-                    .map(MongoDocument::fromDocument)
-                    .collect(Collectors.toList()));
+                    .getDocuments());
         }
 
 
         if (original.getParents() != null) {
-            ret.setParents(original
-                    .getParents()
-                    .stream()
-                    .map(MongoConfigCoordinate::fromCoordinate)
-                    .collect(Collectors.toList()));
+            ret.setParents(toMongoCoordinates(original.getParents()));
         }
 
-        ret.setProperties(MongoConfigProperties.fromMap( (Map<String, String>)original.getProperties()));
+        ret.setProperties(MongoConfigProperties.fromMap(original.getProperties()));
 
         return ret;
     }

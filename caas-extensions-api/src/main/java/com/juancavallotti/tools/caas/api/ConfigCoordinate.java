@@ -6,15 +6,23 @@ import java.lang.String;
 
 @JsonDeserialize(as = DefaultConfigCoordinate.class)
 public interface ConfigCoordinate {
-  String getApplication();
+    String getApplication();
 
-  void setApplication(String application);
+    void setApplication(String application);
 
-  String getVersion();
+    String getVersion();
 
-  void setVersion(String version);
+    void setVersion(String version);
 
-  String getEnvironment();
+    String getEnvironment();
 
-  void setEnvironment(String environment);
+    void setEnvironment(String environment);
+
+    default String print() {
+        return "{" +
+                "application='" + getApplication() + '\'' +
+                ", version='" + getVersion() + '\'' +
+                ", environment='" + getEnvironment() + '\'' +"}";
+    }
+
 }

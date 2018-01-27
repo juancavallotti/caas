@@ -4,9 +4,7 @@ import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.api.ConfigurationElement;
 import com.juancavallotti.tools.caas.api.Document;
 import com.juancavallotti.tools.caas.api.DocumentData;
-import com.juancavallotti.tools.caas.mongo.model.MongoDocument;
-import com.juancavallotti.tools.caas.mongo.model.MongoDocumentData;
-import com.juancavallotti.tools.caas.mongo.model.MongoConfigurationElement;
+import com.juancavallotti.tools.caas.mongo.model.*;
 import com.juancavallotti.tools.caas.mongo.repository.ConfigurationRepository;
 import com.juancavallotti.tools.caas.mongo.repository.DocumentDataRepository;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
@@ -20,6 +18,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class MongoConfigurationServiceBackend implements ConfigurationServiceBackend {
 
@@ -65,12 +65,13 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
         }
 
         //check the parents exist
-        for(ConfigCoordinate parent : element.getParents()) {
-            if (findWithCoordinate(parent) == null)
-                throwWithMessageAndCause("Parent not found",
-                        ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
+        if (element.getParents() != null) {
+            for (ConfigCoordinate parent : element.getParents()) {
+                if (findWithCoordinate(parent) == null)
+                    throwWithMessageAndCause("Parent not found",
+                            ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
+            }
         }
-
 
         repository.save(MongoConfigurationElement.fromConfigurationElement(element));
         return element;
@@ -79,11 +80,8 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     @Override
     public Document setDocument(ConfigCoordinate coordinate, String documentName, String contentType, InputStream documentData) throws ConfigurationServiceBackendException {
 
-        MongoConfigurationElement config = findWithCoordinate(coordinate);
-
-        if (config == null) {
-            throwConfigNotFound();
-        }
+        MongoConfigurationElement config = lookFor(coordinate)
+                .orElseThrow(this::configNotFoundException);
 
         //if the document already exists, update the data
         Document doc = findDocument(config, documentName);
@@ -120,11 +118,8 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     @Override
     public DocumentData getDocumentData(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException {
 
-        MongoConfigurationElement config = findWithCoordinate(coordinate);
-
-        if (config == null) {
-            throwConfigNotFound();
-        }
+        MongoConfigurationElement config = lookFor(coordinate)
+                .orElseThrow(this::configNotFoundException);
 
         //if the document already exists, update the data
         Document doc = findDocument(config, documentName);
@@ -159,7 +154,7 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
         MongoConfigurationElement ret = repository.findByApplicationIgnoreCaseAndVersionAndEnvironmentIgnoreCase(application, version, environment);
 
         if (ret == null) {
-            throwConfigNotFound();
+            throw configNotFoundException();
         }
 
         return standardizeProps(ret);
@@ -171,8 +166,49 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     }
 
 
+    @Override
+    public ConfigurationElement patchConfiguration(ConfigurationElement entity) throws ConfigurationServiceBackendException {
+
+        MongoConfigurationElement existingConfig = lookFor(entity)
+                .orElseThrow(this::configNotFoundException);
+
+        //merge the properties.
+        if (entity.getProperties() != null) {
+
+            //existing config may not have properties.
+            if (existingConfig.getProperties() == null) {
+                existingConfig.setProperties(new MongoConfigProperties());
+            }
+
+
+            for(Map.Entry<String, String> entry : entity.getProperties().entrySet()) {
+                //blindly set, this will update or create.
+                existingConfig.getProperties()
+                        .setStandardizedProperty(entry.getKey(), entry.getValue());
+            }
+
+
+        }
+
+        //merge the parents.
+        //this is easy as we can simply replace the parents if they exist.
+        if (entity.getParents() != null) {
+            for (ConfigCoordinate coordinate : entity.getParents()) {
+                lookFor(coordinate).orElseThrow(() -> configNotFoundException(coordinate));
+            }
+
+            //replace the parents.
+            existingConfig.setParents(MongoConfigCoordinate.toMongoCoordinates(entity.getParents()));
+        }
+
+        //if everything is right, we update in the backed.
+        repository.save(existingConfig);
+
+        return existingConfig;
+    }
+
     //utility methdods
-    public MongoConfigurationElement findWithCoordinate(ConfigCoordinate coordinate) {
+    private MongoConfigurationElement findWithCoordinate(ConfigCoordinate coordinate) {
         return repository.findByApplicationIgnoreCaseAndVersionAndEnvironmentIgnoreCase(
                 coordinate.getApplication(),
                 coordinate.getVersion(),
@@ -180,9 +216,16 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
         );
     }
 
-    private void throwConfigNotFound() throws ConfigurationServiceBackendException {
+    private Optional<MongoConfigurationElement> lookFor(ConfigCoordinate coordinate) {
+        return Optional.of(findWithCoordinate(coordinate));
+    }
 
-        throwWithMessageAndCause("Config not found", ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND);
+    private ConfigurationServiceBackendException configNotFoundException() {
+        return exceptionWithMessageAndCause("Config not found", ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND);
+    }
+
+    private ConfigurationServiceBackendException configNotFoundException(ConfigCoordinate coordinate) {
+        return exceptionWithMessageAndCause("Config not found: " + coordinate.print(), ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND);
     }
 
     private void throwDocNotFound(String name) throws ConfigurationServiceBackendException {
@@ -201,8 +244,12 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
         }
     }
 
-    private void throwWithMessageAndCause(String message, ConfigurationServiceBackendException.ExceptionCause cause) throws ConfigurationServiceBackendException{
-        throw ConfigurationServiceBackendException.builder()
+    private void throwWithMessageAndCause(String message, ConfigurationServiceBackendException.ExceptionCause cause) throws ConfigurationServiceBackendException {
+        throw exceptionWithMessageAndCause(message, cause);
+    }
+
+    private ConfigurationServiceBackendException exceptionWithMessageAndCause(String message, ConfigurationServiceBackendException.ExceptionCause cause) {
+        return ConfigurationServiceBackendException.builder()
                 .setMessage(message)
                 .setCauseType(cause)
                 .build();

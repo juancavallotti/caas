@@ -88,7 +88,8 @@ public interface ConfigurationServiceBackend {
      * NOTE: this method must not update any of the existing documents. If user provides documents
      * there is the option to ignore them or to throw invalid data exception.
      *
-     * This method just creates new properties, or updates existing ones
+     * This method just creates new properties, or updates existing ones,
+     * also updates the parents, if provided.
      *
      * This is an optional operation.
      * @param entity the configuration to update.

@@ -3,6 +3,9 @@ package com.juancavallotti.tools.caas.mongo.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MongoConfigCoordinate implements ConfigCoordinate {
     private String application;
@@ -49,4 +52,11 @@ public class MongoConfigCoordinate implements ConfigCoordinate {
     public static MongoConfigCoordinate fromCoordinate(ConfigCoordinate source) {
         return fromConfigCoordinate(new MongoConfigCoordinate(), source);
     }
+
+    public static List<ConfigCoordinate> toMongoCoordinates(List<ConfigCoordinate> coordinates) {
+        return coordinates.stream()
+                .map(MongoConfigCoordinate::fromCoordinate)
+                .collect(Collectors.toList());
+    }
+
 }

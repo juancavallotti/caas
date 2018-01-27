@@ -4,36 +4,39 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.io.Serializable;
 import java.lang.String;
 import java.util.List;
+import java.util.Map;
 
 @JsonDeserialize(as = DefaultConfigurationElement.class)
 public interface ConfigurationElement extends ConfigCoordinate {
-  String getApplication();
+    String getApplication();
 
-  void setApplication(String application);
+    void setApplication(String application);
 
-  String getVersion();
+    String getVersion();
 
-  void setVersion(String version);
+    void setVersion(String version);
 
-  String getEnvironment();
+    String getEnvironment();
 
-  void setEnvironment(String environment);
+    void setEnvironment(String environment);
 
-  List<ConfigCoordinate> getParents();
+    List<ConfigCoordinate> getParents();
 
-  void setParents(List<ConfigCoordinate> parents);
+    void setParents(List<ConfigCoordinate> parents);
 
-  PropertiesType getProperties();
+    PropertiesType getProperties();
 
-  void setProperties(PropertiesType properties);
+    void setProperties(PropertiesType properties);
 
-  List<Document> getDocuments();
+    List<Document> getDocuments();
 
-  void setDocuments(List<Document> documents);
+    void setDocuments(List<Document> documents);
 
-  @JsonDeserialize(as = DefaultConfigurationElement.DefaultPropertiesType.class)
-  interface PropertiesType {
-  }
+    @JsonDeserialize(as = DefaultConfigurationElement.DefaultPropertiesType.class)
+    interface PropertiesType extends Map<String, String>, Serializable {
+
+    }
 }
