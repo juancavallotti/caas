@@ -1,3 +1,9 @@
-include 'caas-extensions-api', 'caas-backend-git', 'caas-backend-mongo', 'caas-runtime'
+include [
+        'caas-extensions-api',
+        'caas-backend-git',
+        'caas-backend-mongo',
+        'caas-backend-memory',
+        'caas-runtime'
+        ]
 rootProject.name = 'caas'
 
