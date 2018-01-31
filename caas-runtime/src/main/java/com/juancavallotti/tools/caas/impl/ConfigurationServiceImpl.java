@@ -67,6 +67,10 @@ public class ConfigurationServiceImpl implements Configuration {
             switch (ex.getCauseType()) {
                 case OPERATION_NOT_SUPPORTED:
                     return PostConfigurationCopyResponse.respond400WithApplicationJson(status("Not supported"));
+                case VALIDATION:
+                    return PostConfigurationCopyResponse.respond400WithApplicationJson(status(ex.getMessage()));
+                case ENTITY_NOT_FOUND:
+                    return PostConfigurationCopyResponse.respond404();
                 default:
                     logger.error("Unknown backend exception", ex);
                     return PostConfigurationCopyResponse.respond500();

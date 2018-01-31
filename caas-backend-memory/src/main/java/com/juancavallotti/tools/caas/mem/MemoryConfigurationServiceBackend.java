@@ -197,6 +197,7 @@ public class MemoryConfigurationServiceBackend implements ConfigurationServiceBa
 
         //otherwise duplicate the documents, and we're done //we don't care to copy
         //the data.
+        repository.add(copy);
         documentRepository.put(ModelUtils.toCoordinate(copy), new HashMap<>(documentRepository.get(coordinate)));
 
         return copy;
@@ -218,6 +219,9 @@ public class MemoryConfigurationServiceBackend implements ConfigurationServiceBa
         for (ConfigurationElement config : configs) {
             //full copy.
             T copy = (T) ModelUtils.toConfiguration(config);
+
+            copy.setVersion(targetVersion);
+
             //change the version.
             if (repository.contains(copy)) {
                 throw exceptionWithDescriptionAndCause("Configuration already exists: " + copy.print(),
@@ -226,7 +230,7 @@ public class MemoryConfigurationServiceBackend implements ConfigurationServiceBa
 
             //proceed to add
             newElements.add(copy);
-            newData.put(ModelUtils.toCoordinate(copy), new HashMap<>(documentRepository.get(config)));
+            newData.put(ModelUtils.toCoordinate(copy), new HashMap<>(documentRepository.getOrDefault(config, new HashMap<>())));
         }
 
         repository.addAll(newElements);
