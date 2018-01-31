@@ -36,6 +36,7 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<ConfigCoordinate> listConfigurations() {
 
         logger.debug("Repository class is: {}", repository.getClass().getName());

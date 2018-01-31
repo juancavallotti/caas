@@ -32,6 +32,7 @@ public class ModelUtils {
         return coordinate;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends ConfigurationElement> T toConfiguration(ConfigurationElement original) {
         DefaultConfigurationElement ret = new DefaultConfigurationElement();
         return copyElement(original, (T) ret);

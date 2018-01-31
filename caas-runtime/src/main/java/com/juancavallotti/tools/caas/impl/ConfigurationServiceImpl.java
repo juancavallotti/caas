@@ -46,6 +46,8 @@ public class ConfigurationServiceImpl implements Configuration {
             switch (ex.getCauseType()) {
                 case VALIDATION:
                     return PostConfigurationResponse.respond400WithApplicationJson(status(ex.getMessage()));
+                case ENTITY_NOT_FOUND:
+                    return PostConfigurationResponse.respond400WithApplicationJson(status(ex.getMessage()));
                 case OPERATION_NOT_SUPPORTED:
                     return PostConfigurationResponse.respond400WithApplicationJson(status("Not supported"));
                 default:

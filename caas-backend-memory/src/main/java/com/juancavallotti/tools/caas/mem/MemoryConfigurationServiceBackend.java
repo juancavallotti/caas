@@ -203,6 +203,7 @@ public class MemoryConfigurationServiceBackend implements ConfigurationServiceBa
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends ConfigurationElement> List<T> createNewVersion(String appName, String version, String targetVersion) throws ConfigurationServiceBackendException {
 
         //this one is more interesting, this copies the entire thing for as many environments we find.

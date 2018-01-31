@@ -1,9 +1,22 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.3'
+    }
+}
+
 //common settings for all sub projects
 subprojects {
     group 'com.juancavallotti.tools'
     version '1.0-SNAPSHOT'
 
     apply plugin: 'java'
+    apply plugin: 'org.junit.platform.gradle.plugin'
+
     sourceCompatibility = 1.9
 
     repositories {
@@ -18,6 +31,7 @@ subprojects {
         jacksonVersion = '2.8.10'
         springVersion = '4.3.13.RELEASE'
         commonsIoVersion = '2.6'
+        junitVersion = '5.0.3'
     }
 
     //some shared dependencies.
@@ -36,7 +50,17 @@ subprojects {
         compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
 
         //all modules depend on junit
-        testCompile group: 'junit', name: 'junit', version: '4.11'
+        testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+        testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    }
+
+    //finally, apply global junit 5 configs.
+    junitPlatform {
+        filters {
+            engines {
+                include 'junit-jupiter'
+            }
+        }
     }
 
 
