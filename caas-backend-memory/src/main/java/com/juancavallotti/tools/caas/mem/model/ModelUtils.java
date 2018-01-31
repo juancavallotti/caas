@@ -32,9 +32,9 @@ public class ModelUtils {
         return coordinate;
     }
 
-    public static ConfigurationElement toConfiguration(ConfigurationElement original) {
+    public static <T extends ConfigurationElement> T toConfiguration(ConfigurationElement original) {
         DefaultConfigurationElement ret = new DefaultConfigurationElement();
-        return copyElement(original, ret);
+        return copyElement(original, (T) ret);
     }
 
     public static Document toDocument(String key, String type) {
@@ -65,7 +65,7 @@ public class ModelUtils {
 
     }
 
-    private static ConfigurationElement copyElement(ConfigurationElement source, ConfigurationElement target) {
+    private static <T extends ConfigurationElement> T copyElement(ConfigurationElement source, T target) {
 
         if (source == null) {
             return null;
@@ -73,6 +73,12 @@ public class ModelUtils {
 
         //copy the default things.
         copy(source, target);
+
+        //copy the properties.
+        if (source.getProperties() != null) {
+            target.setProperties(new DefaultConfigurationElement.DefaultPropertiesType());
+            target.getProperties().putAll(source.getProperties());
+        }
 
         if (source.getParents() != null) {
             target.setParents(new LinkedList<>(source.getParents()));

@@ -140,20 +140,98 @@ public class MemoryConfigurationServiceBackend implements ConfigurationServiceBa
     @Override
     public ConfigurationElement patchConfiguration(ConfigurationElement entity) throws ConfigurationServiceBackendException {
 
-        //
+        //this would leave the existing element half populated on a failure.
+        //is so better to store a copy of it before updating.
 
+        //retrieve config
+        ConfigurationElement existing = findInRepo(entity)
+                .orElseThrow(() -> configNotFound(entity));
 
-        return null;
+        repository.add(ModelUtils.toConfiguration(existing));
+
+        //merge the properties.
+        if (existing.getProperties() == null) {
+            existing.setProperties(new DefaultConfigurationElement.DefaultPropertiesType());
+        }
+        //override or create new
+        existing.getProperties().putAll(entity.getProperties());
+
+        //we're done
+        if (entity.getParents() == null) {
+            return existing;
+        }
+
+        if (existing.getParents() == null) {
+            //init the list if not there.
+            existing.setParents(new LinkedList<>());
+        }
+
+        for (ConfigCoordinate parent : entity.getParents()) {
+            if (!existing.getParents().contains(parent)) {
+                existing.getParents().add(ModelUtils.toCoordinate(parent));
+            }
+        }
+
+        return existing;
     }
 
     @Override
     public ConfigurationElement promoteConfiguration(ConfigCoordinate coordinate, String targetEnvironment) throws ConfigurationServiceBackendException {
-        return null;
+
+        //the promote task is easy.
+        // We just create a copy of the model and store a copy of the documents.
+        ConfigurationElement existing = findInRepo(coordinate)
+                .orElseThrow(() -> configNotFound(coordinate));
+
+        //copy
+        ConfigurationElement copy = ModelUtils.toConfiguration(existing);
+
+        //change the environment
+        copy.setEnvironment(targetEnvironment);
+
+        //if the config already exists, fail!
+        if (repository.contains(copy)) {
+            throw exceptionWithDescriptionAndCause("Configuration already exists: " + copy.print(),
+                    null, ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
+        }
+
+        //otherwise duplicate the documents, and we're done //we don't care to copy
+        //the data.
+        documentRepository.put(ModelUtils.toCoordinate(copy), new HashMap<>(documentRepository.get(coordinate)));
+
+        return copy;
     }
 
     @Override
     public <T extends ConfigurationElement> List<T> createNewVersion(String appName, String version, String targetVersion) throws ConfigurationServiceBackendException {
-        return null;
+
+        //this one is more interesting, this copies the entire thing for as many environments we find.
+        List<ConfigurationElement> configs = repository.stream()
+                .filter(app -> Objects.equals(appName, app.getApplication()) && Objects.equals(version, app.getVersion()))
+                .collect(Collectors.toList());
+
+        List<T> newElements = new LinkedList<>();
+        Map<ConfigCoordinate, Map<String, byte[]>> newData = new HashMap<>();
+
+        //now we do some magic.
+        for (ConfigurationElement config : configs) {
+            //full copy.
+            T copy = (T) ModelUtils.toConfiguration(config);
+            //change the version.
+            if (repository.contains(copy)) {
+                throw exceptionWithDescriptionAndCause("Configuration already exists: " + copy.print(),
+                        null, ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
+            }
+
+            //proceed to add
+            newElements.add(copy);
+            newData.put(ModelUtils.toCoordinate(copy), new HashMap<>(documentRepository.get(config)));
+        }
+
+        repository.addAll(newElements);
+        documentRepository.putAll(newData);
+
+        return Collections.unmodifiableList(newElements);
     }
 
     private Optional<ConfigurationElement> findInRepo(String app, String version, String env) {
