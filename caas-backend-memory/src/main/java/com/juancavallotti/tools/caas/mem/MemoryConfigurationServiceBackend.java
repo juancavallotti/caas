@@ -241,7 +241,7 @@ public class MemoryConfigurationServiceBackend implements ConfigurationServiceBa
 
     private Optional<ConfigurationElement> findInRepo(ConfigCoordinate coordinate) {
         return repository.stream()
-                .filter(item -> Objects.equals(item, coordinate))
+                .filter(item -> Objects.equals(coordinate, item))
                 .findFirst();
     }
 

@@ -3,6 +3,7 @@ package com.juancavallotti.tools.caas.api;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Default pojos should make module developer's life easier.
@@ -70,5 +71,27 @@ public class DefaultConfigurationElement implements ConfigurationElement {
 
     public static class DefaultPropertiesType extends HashMap<String, String> implements ConfigurationElement.PropertiesType {
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        //because configuration coordinates are unique, we dont bother in checking the rest
+        //this is useful for in memory implementations, if a framework requires something
+        // different, that's why the pojos have interfaces, create your own, or maybe a
+        // subclass!
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultConfigurationElement that = (DefaultConfigurationElement) o;
+        return Objects.equals(getApplication(), that.getApplication()) &&
+                Objects.equals(getVersion(), that.getVersion()) &&
+                Objects.equals(getEnvironment(), that.getEnvironment());
+    }
+
+    @Override
+    public int hashCode() {
+
+        //see equals :D
+        return Objects.hash(getApplication(), getVersion(), getEnvironment());
     }
 }

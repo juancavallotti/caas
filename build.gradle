@@ -50,8 +50,11 @@ subprojects {
         compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
 
         //all modules depend on junit
-        testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-        testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
+        testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
+        testRuntime group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: logj4version
+        testRuntime group: 'com.lmax', name: 'disruptor', version: '3.3.7'
+        testRuntime project(':test-commons')
     }
 
     //finally, apply global junit 5 configs.
@@ -61,6 +64,7 @@ subprojects {
                 include 'junit-jupiter'
             }
         }
+        enableStandardTestTask true
     }
 
 

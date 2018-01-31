@@ -40,11 +40,11 @@ public class DefaultConfigCoordinate implements ConfigCoordinate {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DefaultConfigCoordinate that = (DefaultConfigCoordinate) o;
-        return Objects.equals(application, that.application) &&
-                Objects.equals(version, that.version) &&
-                Objects.equals(environment, that.environment);
+        if (o == null || !(o instanceof ConfigCoordinate)) return false;
+        ConfigCoordinate that = (ConfigCoordinate) o;
+        return Objects.equals(getApplication(), that.getApplication()) &&
+                Objects.equals(getVersion(), that.getVersion()) &&
+                Objects.equals(getEnvironment(), that.getEnvironment());
     }
 
     @Override

@@ -3,7 +3,8 @@ include (
         'caas-backend-git',
         'caas-backend-mongo',
         'caas-backend-memory',
-        'caas-runtime'
+        'caas-runtime',
+        'test-commons'
 )
 rootProject.name = 'caas'
 
