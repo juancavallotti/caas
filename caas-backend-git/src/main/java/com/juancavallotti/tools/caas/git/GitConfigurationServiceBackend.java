@@ -1,6 +1,8 @@
 package com.juancavallotti.tools.caas.git;
 
 import com.juancavallotti.tools.caas.api.*;
+import com.juancavallotti.tools.caas.git.model.GitConfigCoordinate;
+import com.juancavallotti.tools.caas.git.model.GitRepositoryModel;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.eclipse.jgit.api.Git;
@@ -35,6 +37,8 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
         logger.info(getServiceName());
     }
 
+    private GitRepositoryModel model;
+
     @PostConstruct
     public void init() {
         logger.info("Loaded Git Configuration Service, backend url: " + repoBackend);
@@ -48,6 +52,10 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
                     .build();
             repo.resolve("HEAD");
             git = new Git(repo);
+
+            //build the model.
+            model = GitRepositoryParser.buildModel(repoDir);
+
         } catch (Exception ex) {
             logger.error("Error while connecting to repository. ", ex);
         }
@@ -57,119 +65,39 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     @Override
     public List<ConfigCoordinate> listConfigurations() {
-
-        List<ConfigCoordinate> ret = new LinkedList<>();
-        Set<String> versions = new TreeSet<>();
-
-        populateWithBranches(versions);
-        populateWithTags(versions);
-
-        //list all files
-        versions.forEach((String ref) -> {
-            Set<String> files = new TreeSet<>();
-            populateWithFiles(files, ref);
-            final String version = ref;
-            files.forEach((String fileName) -> {
-
-                //we already know the version.
-                DefaultConfigCoordinate cc = new DefaultConfigCoordinate();
-                cc.setVersion(version);
-                parseCoordinateDetails(fileName, cc);
-                ret.add(cc);
-            });
-        });
-
-        return ret;
+        return model.listConfigs();
     }
 
 
     @Override
     public DocumentData getDocumentData(ConfigCoordinate coordinate, String documentName) throws ConfigurationServiceBackendException {
-        return null;
+
+        GitConfigCoordinate gitCoordinate = model.findConfiguration(coordinate)
+                .orElseThrow(this::coordinateNotFound);
+
+        return gitCoordinate.documentData(documentName).orElseThrow(this::documentNotFound);
     }
 
     @Override
-    public ConfigurationElement findConfiguration(String application, String environment, String version) throws ConfigurationServiceBackendException {
-        return null;
+    public ConfigurationElement findConfiguration(String application, String version, String environment) throws ConfigurationServiceBackendException {
+
+        ConfigurationElement ret = model.findConfigurationElement(application, version, environment)
+                .orElseThrow(this::coordinateNotFound);
+        return ret;
     }
 
-    private void populateWithFiles(Collection<String> container, String ref) {
-        try {
-            Ref r = git.checkout().setName(ref).call();
-
-            File[] files = new File(repoBackend).listFiles((FilenameFilter)(File dir, String name) -> {
-                return isConfigFile(name);
-            });
-
-            for(File f: files) {
-                container.add(f.getName());
-            }
-
-        } catch (Exception ex) {
-            logger.error("Could not retrieve files for ref: " + ref, ex);
-        }
+    public ConfigurationServiceBackendException coordinateNotFound() {
+        return ConfigurationServiceBackendException.builder()
+                .setMessage("Configuration not found.")
+                .setCauseType(ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND)
+                .build();
     }
 
-    private void populateWithBranches(Collection<String> container) {
-        try {
-            List<Ref> refs = git.branchList().call();
-            populateWithRefList(container, refs, "refs/branches/", "refs/heads/");
-        } catch (Exception ex) {
-            logger.error("Could not retrieve branches", ex);
-        }
+    public ConfigurationServiceBackendException documentNotFound() {
+        return ConfigurationServiceBackendException.builder()
+                .setMessage("Document not found.")
+                .setCauseType(ConfigurationServiceBackendException.ExceptionCause.ENTITY_NOT_FOUND)
+                .build();
     }
 
-    private void populateWithTags(Collection<String> container) {
-        try {
-            List<Ref> refs = git.tagList().call();
-            populateWithRefList(container, refs, "refs/tags/");
-        } catch (Exception ex) {
-            logger.error("Could not retrieve tags", ex);
-        }
-    }
-
-    private void populateWithRefList(Collection<String> container, List<Ref> values, String... prefix) throws Exception {
-
-        if (values == null) {
-            return;
-        }
-
-        values.stream().forEach((Ref r) -> {
-
-            String name = r.getName();
-
-            for(String p : prefix) {
-                if (name.startsWith(p)) {
-                    name = StringUtils.delete(name, p);
-                    break;
-                }
-            }
-
-            container.add(name);
-        });
-    }
-
-    private boolean isConfigFile(String fileName) {
-        return StringUtils.endsWithIgnoreCase(fileName, ".properties");
-    }
-
-
-    private void parseCoordinateDetails(String fileName, ConfigCoordinate coord) {
-
-        //file must be appName-env.properties
-
-        //first, we remove the extension.
-        String appName = StringUtils.stripFilenameExtension(fileName);
-
-        //next proceed to split
-        if (fileName.contains("-")) {
-            String[] parts = StringUtils.split(appName, "-");
-            coord.setApplication(parts[0]);
-            coord.setEnvironment(parts[1]);
-        } else {
-            coord.setApplication(appName);
-            coord.setEnvironment(defaultEnvironmentName);
-        }
-
-    }
 }
