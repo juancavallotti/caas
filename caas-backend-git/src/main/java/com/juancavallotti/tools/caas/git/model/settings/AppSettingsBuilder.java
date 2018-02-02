@@ -1,5 +1,6 @@
 package com.juancavallotti.tools.caas.git.model.settings;
 
+import com.juancavallotti.tools.caas.git.model.ModelConventions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Objects;
 
 public class AppSettingsBuilder {
@@ -53,9 +55,36 @@ public class AppSettingsBuilder {
         Yaml yaml = new Yaml();
         appSettings = yaml.loadAs(settingsStream, AppSettings.class);
 
+        fillDefaults(appSettings);
+
         return appSettings;
     }
 
+    public AppSettings defaults() {
 
+        AppSettings appSettings = new AppSettings();
+
+        fillDefaults(appSettings);
+
+        return appSettings;
+    }
+
+    private void fillDefaults(AppSettings settings) {
+        if (settings.getDocsPrefix() == null) {
+            settings.setDocsPrefix(ModelConventions.defaultDocsFolderPrefix);
+        }
+
+        if (settings.getPropertiesFileTemplate() == null) {
+            settings.setPropertiesFileTemplate(ModelConventions.defaultPropertiesFileTemplate);
+        }
+
+        if (settings.getParents() == null) {
+            settings.setParents(Collections.emptyList());
+        }
+
+        if (settings.getEnvironments() == null) {
+            settings.setEnvironments(Collections.emptyMap());
+        }
+    }
 
 }

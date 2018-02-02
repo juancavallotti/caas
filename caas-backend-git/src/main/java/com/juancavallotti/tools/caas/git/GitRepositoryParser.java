@@ -1,11 +1,10 @@
 package com.juancavallotti.tools.caas.git;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
-import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.git.model.GitConfigCoordinate;
 import com.juancavallotti.tools.caas.git.model.GitDocument;
 import com.juancavallotti.tools.caas.git.model.GitRepositoryModel;
 import com.juancavallotti.tools.caas.git.model.ModelConventions;
+import com.juancavallotti.tools.caas.git.model.settings.AppSettings;
 import org.eclipse.jgit.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +13,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -77,64 +76,116 @@ public class GitRepositoryParser {
         //the default convention is appName__<<env>>.properties.
         String versionName = versionPath.getName();
 
-        String conventionStart = appName + "_";
-        String conventionEnd = ".properties";
+        AppSettings settings = readSettings(versionPath).orElse(AppSettings.builder().defaults());
+        GitRepositoryParserContext context = new GitRepositoryParserContext(appName, versionName, globals, configs, versionPath);
 
-        File[] candidateEnvs = versionPath.listFiles((FileFilter) (pathname -> pathname.isFile() && pathname.getName().endsWith(conventionEnd)));
+        //scan all properties files.
+        File[] candidateEnvs = versionPath
+                .listFiles((FileFilter) (pathname -> pathname.isFile() && pathname.getName().endsWith(ModelConventions.ENVIRONMENT_PROPS_EXTENSION)));
 
+        logger.debug("Found properties Files", candidateEnvs);
 
-        Arrays.stream(candidateEnvs)
-                .forEach(envPath -> {
-
-            String fileName = envPath.getName();
-
-            logger.debug("Attempting to parse file in app {} version {}: {}", appName, versionName, fileName);
-
-            if (!fileName.startsWith(conventionStart) || !fileName.endsWith(conventionEnd)) {
-                logger.debug("File does not match the convention");
-                return;
-            }
-            //remove the junk
-            String envName = fileName.substring(conventionStart.length(), fileName.length() - conventionEnd.length());
-
-            if (StringUtils.isEmptyOrNull(envName)) {
-                logger.debug("File does not respect the convention...");
-                return;
-            }
-
-            Properties props = new Properties();
-            try {
-                props.load(new FileInputStream(envPath));
-            } catch (IOException ex) {
-                logger.error("Could not read properties file.", ex);
-            }
-
-            File[] docs = new File(versionPath.getPath() + File.separator + ModelConventions.defaultDocsFolderPrefix + envName).listFiles();
-
-            if (docs == null) {
-                docs = new File[0];
-            }
-
-            Map<String, GitDocument> configDocs = Arrays.stream(docs)
-                    .filter(file -> file.isFile())
-                    .map(file -> new GitDocument(file)).collect(Collectors.toMap(gf -> gf.getKey(), gf -> gf));
-
-            //finally, build the coordinate.
-            GitConfigCoordinate coordinate = new GitConfigCoordinate(ModelConventions.defaultDocsFolderPrefix, props, configDocs);
-            coordinate.setApplication(appName);
-            coordinate.setVersion(versionName);
-            coordinate.setEnvironment(envName);
-
-            //check if it belongs to the globals list.
-            if (ModelConventions.defaultGlobalAppNames.contains(appName)) {
-                logger.debug("Coordinate {} is conventionally global.", appName);
-                globals.add(coordinate);
-            }
-
-            configs.add(coordinate);
+        Arrays.stream(candidateEnvs).forEach(envPath -> {
+            parseVersionFolderEntry(settings, context, envPath);
         });
     }
 
 
+    private static void parseVersionFolderEntry(AppSettings settings, GitRepositoryParserContext context, File envPath) {
+        String fileName = envPath.getName();
+
+        String appName = context.appFolderName;
+        String versionName = context.versionFolderName;
+        String conventionStart = settings.buildPropertiesFileTemplate(appName, versionName);
+        String conventionEnd = ModelConventions.ENVIRONMENT_PROPS_EXTENSION;
+
+        logger.debug("Attempting to parse file in app {} version {}: {}", appName, versionName, fileName);
+
+        if (!fileName.startsWith(conventionStart) || !fileName.endsWith(conventionEnd)) {
+            logger.debug("File does not match the convention");
+            return;
+        }
+        //remove the junk
+        String envName = fileName.substring(conventionStart.length(), fileName.length() - conventionEnd.length());
+
+        if (StringUtils.isEmptyOrNull(envName)) {
+            logger.debug("File does not respect the convention...");
+            return;
+        }
+
+        //TODO - Apply specific settings from the object.
+
+        Properties props = new Properties();
+        try {
+            props.load(new FileInputStream(envPath));
+        } catch (IOException ex) {
+            logger.error("Could not read properties file.", ex);
+        }
+
+        File[] docs = new File(context.versionFolder.getPath() + File.separator + settings.getDocsPrefix() + envName).listFiles();
+
+        if (docs == null) {
+            docs = new File[0];
+        }
+
+        Map<String, GitDocument> configDocs = Arrays.stream(docs)
+                .filter(file -> file.isFile())
+                .map(file -> new GitDocument(file)).collect(Collectors.toMap(gf -> gf.getKey(), gf -> gf));
+
+        //finally, build the coordinate.
+        GitConfigCoordinate coordinate = new GitConfigCoordinate(ModelConventions.defaultDocsFolderPrefix, props, configDocs);
+        coordinate.setApplication(appName);
+        coordinate.setVersion(versionName);
+        coordinate.setEnvironment(envName);
+
+
+        //check if it belongs to the globals list.
+        if (ModelConventions.defaultGlobalAppNames.contains(appName)) {
+            logger.debug("Coordinate {} is conventionally global.", appName);
+            context.globals.add(coordinate);
+        }
+
+
+        //TODO - Apply settings defined in config.
+        context.configs.add(coordinate);
+    }
+
+    private static Optional<AppSettings> readSettings(File versionPath) {
+
+        try {
+            Path configFile = Files
+                    .find(versionPath.toPath(), 1, (p, attr) -> ModelConventions.SETTINGS_FILE.equals(p.getFileName().toString()))
+                    .findFirst().orElse(null);
+
+            if (configFile == null) {
+                logger.debug("No specific config found for app.");
+                return Optional.empty();
+            }
+
+            logger.debug("Reading configuration file for application: {}", configFile);
+
+            return Optional.of(AppSettings.builder().fromPath(configFile).build());
+        } catch (IOException ex) {
+            logger.error("Error while locating app config file...", ex);
+            return Optional.empty();
+        }
+    }
+
+    private static class GitRepositoryParserContext {
+
+        private final String appFolderName;
+        private final String versionFolderName;
+        private final List<GitConfigCoordinate> globals;
+        private final List<GitConfigCoordinate> configs;
+        private final File versionFolder;
+
+        public GitRepositoryParserContext(String appFolderName, String versionFolderName, List<GitConfigCoordinate> globals, List<GitConfigCoordinate> configs, File versionFolder) {
+            this.appFolderName = appFolderName;
+            this.versionFolderName = versionFolderName;
+            this.globals = globals;
+            this.configs = configs;
+            this.versionFolder = versionFolder;
+        }
+    }
 
 }

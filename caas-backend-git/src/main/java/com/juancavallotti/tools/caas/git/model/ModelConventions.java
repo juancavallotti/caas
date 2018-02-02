@@ -23,13 +23,21 @@ public interface ModelConventions {
             ".yml", "application/x-yaml"
     );
 
+    //Conventions that may be overriden by configuration.
+
     String defaultExtension = ".txt";
 
     String defaultContentType = contentTypeMapping.get(defaultExtension);
 
     String defaultDocsFolderPrefix = "docs_";
 
+    String defaultPropertiesFileTemplate = "{application}_";
+
+    //Constants are set in capitals.
+
     String GIT_DIR = ".git";
 
+    String SETTINGS_FILE = "settings.yml";
 
+    String ENVIRONMENT_PROPS_EXTENSION = ".properties";
 }
