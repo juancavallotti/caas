@@ -1,0 +1,15 @@
+docsPrefix: documents_
+environments:
+  dev:
+    documentsPath: devDocs
+    parents:
+      # environment is optional
+      - application: parent
+        version: v1
+        environment: dev
+  #rest of the environments have standard conventional settings.
+  #but we can have a global parents setting
+parents:
+  - application: globals
+    version: v1
+  #and we leave empty the environment to match the environment, if present.

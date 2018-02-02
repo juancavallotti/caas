@@ -4,11 +4,15 @@ import com.juancavallotti.tools.caas.api.Document;
 import com.juancavallotti.tools.caas.git.GitRepositoryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+
+import static com.juancavallotti.tools.caas.git.utils.RepositoryUtils.resolveContentType;
 
 public class GitDocument implements Document {
 
@@ -36,20 +40,29 @@ public class GitDocument implements Document {
 
     @Override
     public String getType() {
-        int extPost = documentFile.getName().lastIndexOf('.');
-        if (extPost < 0) {
-            return ModelConventions.defaultContentType;
+
+        String type = null;
+
+        try {
+            //we rely on the most extensive content type library.
+            type = Files.probeContentType(documentFile.toPath());
+        } catch (IOException ex) {
+            //this should not happen
+            logger.error("Error while trying to probe file's content type");
+            type = null;
         }
 
-        String ext = documentFile.getName().substring(extPost);
+        if (!StringUtils.isEmpty(type)) {
+            return type;
+        } else {
+            return resolveContentType(documentFile.getName());
+        }
 
-        logger.debug("File {} has extension {}", documentFile.getName(), ext);
-
-        return ModelConventions.contentTypeMapping.getOrDefault(ext, ModelConventions.defaultContentType);
     }
 
     @Override
     public void setType(String type) {
         throw new UnsupportedOperationException("This is immutable");
     }
+
 }
