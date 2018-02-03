@@ -14,6 +14,7 @@ public class AppSettings {
     private Map<String, EnvironmentSettings> environments;
     private List<DefaultConfigCoordinate> parents;
     private String propertiesFileTemplate;
+    private boolean global;
 
     public String getDocsPrefix() {
         return docsPrefix;
@@ -47,6 +48,14 @@ public class AppSettings {
         this.propertiesFileTemplate = propertiesFileTemplate;
     }
 
+    public boolean isGlobal() {
+        return global;
+    }
+
+    public void setGlobal(boolean global) {
+        this.global = global;
+    }
+
     public final static AppSettingsBuilder builder() {
         return new AppSettingsBuilder();
     }
@@ -57,14 +66,15 @@ public class AppSettings {
      * @return
      */
     public EnvironmentSettings forEnvironment(String name) {
-        return Optional.ofNullable(environments.get(name)).orElseGet(() -> defaultEnvironment(name));
+        EnvironmentSettings settings = Optional.ofNullable(environments.get(name)).orElseGet(() -> defaultEnvironment(name));
+        return settings;
     }
 
     public EnvironmentSettings defaultEnvironment(String name) {
 
         EnvironmentSettings ret = new EnvironmentSettings();
 
-        ret.setParents(Collections.emptyList());
+        ret.setParents(Collections.unmodifiableList(getParents()));
         ret.setDocumentsPath(getDocsPrefix() + name);
 
         return ret;

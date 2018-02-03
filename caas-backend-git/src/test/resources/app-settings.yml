@@ -1,4 +1,5 @@
 docsPrefix: documents_
+global: true #specifies whether this app is global or not.
 environments:
   dev:
     documentsPath: devDocs

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,8 +52,10 @@ public class AppSettingsBuilder {
 
         AppSettings appSettings = null;
 
-        //Constructor constructor = new Constructor(AppSettings.class);
-        Yaml yaml = new Yaml();
+        Representer rep = new Representer();
+        rep.getPropertyUtils().setSkipMissingProperties(true);
+        Constructor constructor = new Constructor(AppSettings.class);
+        Yaml yaml = new Yaml(constructor, rep);
         appSettings = yaml.loadAs(settingsStream, AppSettings.class);
 
         fillDefaults(appSettings);
@@ -72,7 +75,7 @@ public class AppSettingsBuilder {
 
         return appSettings;
     }
-    
+
     private void fillDefaults(AppSettings settings) {
         if (settings.getDocsPrefix() == null) {
             settings.setDocsPrefix(ModelConventions.defaultDocsFolderPrefix);

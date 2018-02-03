@@ -42,11 +42,7 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
         ret.setVersion(getVersion());
         ret.setEnvironment(getEnvironment());
 
-        //build the properties.
-        LinkedList<ConfigCoordinate> parents = new LinkedList<>(globals);
-
-        //TODO - Read other parents by configuration.
-        ret.setParents(Collections.unmodifiableList(parents));
+        buildParents(ret, globals, repo);
 
         //read the documents.
         File[] docs = documentsFolder.listFiles();
@@ -99,6 +95,57 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
         });
     }
 
+    private void buildParents(ConfigurationElement element, List<GitConfigCoordinate> globals, List<GitConfigCoordinate> repo) {
+
+        //simply remove all apps that have the same name, so we dont have strange combinations.
+        //we only want globals that are the same version and environment too, so the rule is
+        //different name AND same version AND same environment
+        List<ConfigCoordinate> globalParents = globals.stream()
+                .filter(p -> !getApplication().equals(p.getApplication())
+                        && getEnvironment().equals(p.getEnvironment())
+                        && getVersion().equals(p.getVersion()))
+                .collect(Collectors.toList());
+
+        //we add all the effective globals.
+        final List<ConfigCoordinate> parents = new LinkedList<>(globalParents);
+
+
+
+        //we read the configuration.
+        environmentSettings.getParents().forEach(p -> {
+
+            //this way we're sure that we're avoiding the user to repeat obvious information.
+            String app = Optional.ofNullable(p.getApplication()).orElseThrow(() -> new IllegalArgumentException("Missing parent name! Please check settings."));
+            String ver = Optional.ofNullable(p.getVersion()).orElse(getVersion());
+            String env = Optional.ofNullable(p.getEnvironment()).orElse(getEnvironment());
+
+            //search it in the repo, if it is there, we'll add it.
+            GitConfigCoordinate found = repo.stream().filter(coord -> {
+                return app.equalsIgnoreCase(coord.getApplication())
+                        && ver.equalsIgnoreCase(coord.getVersion())
+                        && env.equalsIgnoreCase(coord.getEnvironment());
+
+            }).findAny().orElse(null);
+
+            if (found != null) {
+                if (!parents.contains(found)) {
+                    parents.add(found);
+                }
+            } else {
+                logger.warn("Parent in configuration [app: {}, ver: {}, env: {}] does not exist in repository!!", app, ver, env);
+            }
+        });
+
+        //if I am in the global and one of my parents is global too, then I need to warn about possible circular dependency!!
+        if (globals.contains(element)) {
+            parents.forEach(p -> {
+                if (globals.contains(p)) logger.warn("Possible circular dependency found!! {} and {} are mutual parents!", p.print(), element.print());
+            });
+        }
+
+        element.setParents(parents);
+    }
+
     private Properties readProperties() {
         try {
             Properties ret = new Properties();
@@ -108,4 +155,7 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
             return new Properties();
         }
     }
+
+
+
 }

@@ -81,8 +81,8 @@ public class DefaultConfigurationElement implements ConfigurationElement {
         // different, that's why the pojos have interfaces, create your own, or maybe a
         // subclass!
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DefaultConfigurationElement that = (DefaultConfigurationElement) o;
+        if (o == null || !(o instanceof ConfigCoordinate)) return false;
+        ConfigCoordinate that = (ConfigCoordinate) o;
         return Objects.equals(getApplication(), that.getApplication()) &&
                 Objects.equals(getVersion(), that.getVersion()) &&
                 Objects.equals(getEnvironment(), that.getEnvironment());

@@ -127,7 +127,7 @@ public class GitRepositoryParser {
 
 
         //check if it belongs to the globals list.
-        if (ModelConventions.defaultGlobalAppNames.contains(appName)) {
+        if (settings.isGlobal() || ModelConventions.defaultGlobalAppNames.contains(appName)) {
             logger.debug("Coordinate {} is conventionally global.", appName);
             context.globals.add(coordinate);
         }
