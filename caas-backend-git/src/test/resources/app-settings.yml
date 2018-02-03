@@ -3,7 +3,7 @@ environments:
   dev:
     documentsPath: devDocs
     parents:
-      # environment is optional
+      # forEnvironment is optional
       - application: parent
         version: v1
         environment: dev
@@ -12,4 +12,4 @@ environments:
 parents:
   - application: globals
     version: v1
-  #and we leave empty the environment to match the environment, if present.
+  #and we leave empty the forEnvironment to match the forEnvironment, if present.

@@ -1,26 +1,40 @@
 package com.juancavallotti.tools.caas.git.model;
 
 import com.juancavallotti.tools.caas.api.*;
+import com.juancavallotti.tools.caas.git.model.settings.EnvironmentSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GitConfigCoordinate extends DefaultConfigCoordinate {
 
-    private final String documentFolderMapping;
+    private final File propsFile;
 
-    private final Properties props;
+    private final File documentsFolder;
 
-    private final Map<String, GitDocument> documents;
+    private final EnvironmentSettings environmentSettings;
 
-    public GitConfigCoordinate(String documentFolderMapping, Properties props, Map<String, GitDocument> documents) {
-        this.documentFolderMapping = documentFolderMapping;
-        this.props = Optional.of(props).orElse(new Properties());
-        this.documents = Optional.of(documents).orElse(new HashMap<>());
+    private static final Logger logger = LoggerFactory.getLogger(GitConfigCoordinate.class);
+
+    /**
+     * Both folders MUST exist
+     * @param settings
+     * @param propsFile
+     * @param documentsFolder
+     */
+    public GitConfigCoordinate(EnvironmentSettings settings, File propsFile, File documentsFolder) {
+        this.propsFile = propsFile;
+        this.documentsFolder = documentsFolder;
+        this.environmentSettings = settings;
     }
 
-    ConfigurationElement buildElement(List<GitConfigCoordinate> globals) {
+    ConfigurationElement buildElement(List<GitConfigCoordinate> globals, List<GitConfigCoordinate> repo) {
 
         DefaultConfigurationElement ret = new DefaultConfigurationElement();
 
@@ -35,22 +49,37 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
         ret.setParents(Collections.unmodifiableList(parents));
 
         //read the documents.
-        ret.setDocuments(Collections.unmodifiableList(new LinkedList<>(documents.values())));
+        File[] docs = documentsFolder.listFiles();
+
+        if (docs == null) {
+            docs = new File[0];
+        }
+
+        List<GitDocument> documents = Arrays.stream(docs)
+                .filter(file -> file.isFile())
+                .map(file -> new GitDocument(file)).collect(Collectors.toList());
+
+        ret.setDocuments(Collections.unmodifiableList(documents));
 
         ret.setProperties(new DefaultConfigurationElement.DefaultPropertiesType());
 
-        Map<String, String> props = new HashMap<>();
-        this.props.entrySet().forEach(entry -> props.put(entry.getKey().toString(), entry.getValue().toString()));
-        ret.getProperties().putAll(Collections.unmodifiableMap(props));
+        Map<String, String> propsMap = readProperties().entrySet()
+                .stream()
+                .collect(Collectors.toMap(ek -> ek.getKey().toString() , ev -> ev.getValue().toString()));
+        ret.getProperties().putAll(Collections.unmodifiableMap(propsMap));
 
         return ret;
     }
 
     public Optional<DocumentData> documentData(String documentName) {
-        GitDocument doc = documents.get(documentName);
-        if (doc == null) {
+
+        File docFile = new File(documentsFolder.getPath() + File.separator + documentName);
+
+        if (!docFile.exists()) {
             return Optional.empty();
         }
+
+        GitDocument doc = new GitDocument(docFile);
 
         return Optional.of(new DocumentData() {
             @Override
@@ -63,9 +92,20 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
                 try {
                     return doc.readContents();
                 } catch (IOException ex) {
+                    logger.error("Got exception while trying to read contents of file.", ex);
                     throw new RuntimeException(ex);
                 }
             }
         });
+    }
+
+    private Properties readProperties() {
+        try {
+            Properties ret = new Properties();
+            ret.load(new FileInputStream(propsFile));
+            return ret;
+        } catch (IOException ex) {
+            return new Properties();
+        }
     }
 }

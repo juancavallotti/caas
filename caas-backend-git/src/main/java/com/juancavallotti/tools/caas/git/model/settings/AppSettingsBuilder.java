@@ -57,6 +57,10 @@ public class AppSettingsBuilder {
 
         fillDefaults(appSettings);
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Effective settings: \n{}", dumpConfig(appSettings));
+        }
+
         return appSettings;
     }
 
@@ -68,7 +72,7 @@ public class AppSettingsBuilder {
 
         return appSettings;
     }
-
+    
     private void fillDefaults(AppSettings settings) {
         if (settings.getDocsPrefix() == null) {
             settings.setDocsPrefix(ModelConventions.defaultDocsFolderPrefix);
@@ -85,6 +89,10 @@ public class AppSettingsBuilder {
         if (settings.getEnvironments() == null) {
             settings.setEnvironments(Collections.emptyMap());
         }
+    }
+
+    public static String dumpConfig(AppSettings config) {
+        return new Yaml().dump(config);
     }
 
 }

@@ -69,7 +69,7 @@ compromised because users may be asked to provide client secret parameter (depen
 **It should not be used in client applications** that don't serve debugging purposes.
 Client secret should never be used on the client side.
 
-To have at least minimum of protection (in already compromised environment) this library generates
+To have at least minimum of protection (in already compromised forEnvironment) this library generates
 a `state` parameter as a series of alphanumeric characters and append them to the request.
 It is expected to return the same string in the response (as defined in rfc6749). Though this
 parameter is optional, it will reject the response if the `state` parameter is not the same as the

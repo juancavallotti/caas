@@ -4,8 +4,10 @@ import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.api.DefaultConfigCoordinate;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class AppSettings {
     private String docsPrefix;
@@ -48,6 +50,26 @@ public class AppSettings {
     public final static AppSettingsBuilder builder() {
         return new AppSettingsBuilder();
     }
+
+    /**
+     * Tries to locate the settings in the environments collection, otherwise returns a default forEnvironment.
+     * @param name the name of the forEnvironment whose settings need to be looked up.
+     * @return
+     */
+    public EnvironmentSettings forEnvironment(String name) {
+        return Optional.ofNullable(environments.get(name)).orElseGet(() -> defaultEnvironment(name));
+    }
+
+    public EnvironmentSettings defaultEnvironment(String name) {
+
+        EnvironmentSettings ret = new EnvironmentSettings();
+
+        ret.setParents(Collections.emptyList());
+        ret.setDocumentsPath(getDocsPrefix() + name);
+
+        return ret;
+    }
+
 
     public String buildPropertiesFileTemplate(String appName, String version) {
 

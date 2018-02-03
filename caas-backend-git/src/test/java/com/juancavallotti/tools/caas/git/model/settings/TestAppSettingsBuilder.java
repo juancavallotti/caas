@@ -21,7 +21,7 @@ public class TestAppSettingsBuilder {
 
         assertNotNull(settings, "Settings should have been built correctly.");
         assertEquals("documents_", settings.getDocsPrefix(), "Check one setting");
-        assertEquals(1, settings.getEnvironments().size(), "We should have one dev environment");
+        assertEquals(1, settings.getEnvironments().size(), "We should have one dev forEnvironment");
         assertEquals(1, settings.getParents().size(), "We should have one global parent");
     }
 }

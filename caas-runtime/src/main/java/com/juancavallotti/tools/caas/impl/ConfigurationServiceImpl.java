@@ -159,7 +159,7 @@ public class ConfigurationServiceImpl implements Configuration {
     @Override
     public PutConfigurationDynamicResponse putConfigurationDynamic(String app, String version, String env, String key, String contentType, InputStream body) {
 
-        logger.debug("Called method to add a document with key: {}, environment: {}, version: {}, key: {}", app, env, version, key);
+        logger.debug("Called method to add a document with key: {}, forEnvironment: {}, version: {}, key: {}", app, env, version, key);
 
         ConfigCoordinate coordinate = coordinate(app, version, env);
 

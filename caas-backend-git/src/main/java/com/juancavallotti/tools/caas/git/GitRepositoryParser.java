@@ -5,6 +5,7 @@ import com.juancavallotti.tools.caas.git.model.GitDocument;
 import com.juancavallotti.tools.caas.git.model.GitRepositoryModel;
 import com.juancavallotti.tools.caas.git.model.ModelConventions;
 import com.juancavallotti.tools.caas.git.model.settings.AppSettings;
+import com.juancavallotti.tools.caas.git.model.settings.EnvironmentSettings;
 import org.eclipse.jgit.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,27 +114,13 @@ public class GitRepositoryParser {
             return;
         }
 
-        //TODO - Apply specific settings from the object.
+        //this will return the settings or the convention.
+        EnvironmentSettings envSettings = settings.forEnvironment(envName);
 
-        Properties props = new Properties();
-        try {
-            props.load(new FileInputStream(envPath));
-        } catch (IOException ex) {
-            logger.error("Could not read properties file.", ex);
-        }
-
-        File[] docs = new File(context.versionFolder.getPath() + File.separator + settings.getDocsPrefix() + envName).listFiles();
-
-        if (docs == null) {
-            docs = new File[0];
-        }
-
-        Map<String, GitDocument> configDocs = Arrays.stream(docs)
-                .filter(file -> file.isFile())
-                .map(file -> new GitDocument(file)).collect(Collectors.toMap(gf -> gf.getKey(), gf -> gf));
+        File documentsPath = new File(context.versionFolder.getPath() + File.separator + envSettings.getDocumentsPath());
 
         //finally, build the coordinate.
-        GitConfigCoordinate coordinate = new GitConfigCoordinate(ModelConventions.defaultDocsFolderPrefix, props, configDocs);
+        GitConfigCoordinate coordinate = new GitConfigCoordinate(envSettings, envPath, documentsPath);
         coordinate.setApplication(appName);
         coordinate.setVersion(versionName);
         coordinate.setEnvironment(envName);
@@ -145,8 +132,6 @@ public class GitRepositoryParser {
             context.globals.add(coordinate);
         }
 
-
-        //TODO - Apply settings defined in config.
         context.configs.add(coordinate);
     }
 

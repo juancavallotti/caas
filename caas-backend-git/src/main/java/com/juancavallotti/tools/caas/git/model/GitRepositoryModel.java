@@ -37,7 +37,7 @@ public class GitRepositoryModel {
 
         //build the thing...
         GitConfigCoordinate gitConfigCoordinate = existing.get();
-        ConfigurationElement element = gitConfigCoordinate.buildElement(globalConfigs);
+        ConfigurationElement element = gitConfigCoordinate.buildElement(globalConfigs, configs);
         return Optional.of(element);
     }
 
