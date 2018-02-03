@@ -6,19 +6,18 @@ import com.juancavallotti.tools.caas.git.model.GitRepositoryModel;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.InputStream;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GitConfigurationServiceBackend implements ConfigurationServiceBackend {
 
@@ -42,19 +41,13 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     private GitRepositoryModel model;
 
+    private boolean running = true;
+
     @PostConstruct
     public void init() {
         logger.info("Loaded Git Configuration Service, backend url: {}, local repo path: {}", repoBackend, localPath);
         try {
             repoDir = new File(localPath);
-//            FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//            Repository repo = builder.setGitDir(new File(repoBackend + File.separator + ".git"))
-//                    .setMustExist(true)
-//                    .findGitDir()
-//                    .readEnvironment()
-//                    .build();
-//            repo.resolve("HEAD");
-//            git = new Git(repo);
 
             logger.debug("Cloning or opening git repository...");
             git = new GitRepository(repoBackend, localPath, branch).buildGit();
@@ -65,16 +58,73 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
             }
 
             logger.debug("Checking out specific branch {}", branch);
-            git.checkout().setName(branch);
+            git.checkout()
+                    .setName(branch)
+                    .setStartPoint("origin/" + branch)
+                    .call();
 
             logger.debug("Parsing directory...");
             //build the model.
             model = GitRepositoryParser.buildModel(repoDir);
 
+            logger.debug("Registering a file system watcher to reload the model.");
+            final WatchService watcher = FileSystems.getDefault().newWatchService();
+
+            try {
+                final WatchKey key = repoDir.toPath().register(watcher,
+                        StandardWatchEventKinds.ENTRY_CREATE,
+                        StandardWatchEventKinds.ENTRY_DELETE,
+                        StandardWatchEventKinds.ENTRY_MODIFY);
+                final ExecutorService ex = Executors.newSingleThreadExecutor();
+                ex.execute(() -> {
+                    while (running) {
+                        try {
+                            WatchKey event = watcher.take();
+
+                            if (!event.pollEvents().isEmpty()) {
+                                logger.info("Repository has changed, will dynamically reload the model...");
+                                GitRepositoryModel repoModel = GitRepositoryParser.buildModel(repoDir);
+                                logger.info("Model reload complete...");
+                                model = repoModel;
+                            }
+
+                            event.reset();
+
+                        } catch (InterruptedException e) {
+                            logger.error("Error while polling filesystem.", ex);
+                        } catch (ClosedWatchServiceException err) {
+                            logger.error("Watch service stopped.");
+                            break;
+                        }
+                    }
+                });
+
+                logger.debug("Registering shutdown hook to release resources... " +
+                        "this can probably be better solved by spring.");
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    try {
+                        watcher.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    key.cancel();
+                    ex.shutdownNow();
+                }));
+
+            } catch (IOException ex) {
+                logger.error("Error while attempting to register filesystem watcher.");
+            }
+
         } catch (Exception ex) {
             logger.error("Error while connecting to repository. ", ex);
         }
 
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        logger.debug("Shutting down... will try to clean up.");
+        running = false;
     }
 
 
