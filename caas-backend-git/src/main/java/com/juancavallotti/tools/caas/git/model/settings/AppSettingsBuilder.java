@@ -58,6 +58,11 @@ public class AppSettingsBuilder {
         Yaml yaml = new Yaml(constructor, rep);
         appSettings = yaml.loadAs(settingsStream, AppSettings.class);
 
+        if (appSettings == null) {
+            //no configuration
+            appSettings = new AppSettings();
+        }
+
         fillDefaults(appSettings);
 
         if (logger.isDebugEnabled()) {

@@ -14,7 +14,7 @@ public class AppSettings {
     private Map<String, EnvironmentSettings> environments;
     private List<DefaultConfigCoordinate> parents;
     private String propertiesFileTemplate;
-    private boolean global;
+    private Boolean global;
 
     public String getDocsPrefix() {
         return docsPrefix;
@@ -48,11 +48,11 @@ public class AppSettings {
         this.propertiesFileTemplate = propertiesFileTemplate;
     }
 
-    public boolean isGlobal() {
+    public Boolean isGlobal() {
         return global;
     }
 
-    public void setGlobal(boolean global) {
+    public void setGlobal(Boolean global) {
         this.global = global;
     }
 
