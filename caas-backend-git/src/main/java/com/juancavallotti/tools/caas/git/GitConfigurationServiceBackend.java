@@ -24,11 +24,14 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     private static final Logger logger = LoggerFactory.getLogger(GitConfigurationServiceBackend.class);
 
-    @Value("${gitbackend.repourl}")
+    @Value("${gitbackend.repoUrl}")
     private String repoBackend;
 
-    @Value("${gitbackend.defaultenv:default}")
-    private String defaultEnvironmentName;
+    @Value("${gitbackend.branch:master}")
+    private String branch;
+
+    @Value("${gitbackend.localPath}")
+    private String localPath;
 
     private Git git;
     private File repoDir;
@@ -41,18 +44,30 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     @PostConstruct
     public void init() {
-        logger.info("Loaded Git Configuration Service, backend url: " + repoBackend);
+        logger.info("Loaded Git Configuration Service, backend url: {}, local repo path: {}", repoBackend, localPath);
         try {
-            repoDir = new File(repoBackend);
-            FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repo = builder.setGitDir(new File(repoBackend + File.separator + ".git"))
-                    .setMustExist(true)
-                    .findGitDir()
-                    .readEnvironment()
-                    .build();
-            repo.resolve("HEAD");
-            git = new Git(repo);
+            repoDir = new File(localPath);
+//            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+//            Repository repo = builder.setGitDir(new File(repoBackend + File.separator + ".git"))
+//                    .setMustExist(true)
+//                    .findGitDir()
+//                    .readEnvironment()
+//                    .build();
+//            repo.resolve("HEAD");
+//            git = new Git(repo);
 
+            logger.debug("Cloning or opening git repository...");
+            git = new GitRepository(repoBackend, localPath, branch).buildGit();
+
+            if (git == null) {
+                logger.error("Error while connecting to GIT repository. Check settings.");
+                return;
+            }
+
+            logger.debug("Checking out specific branch {}", branch);
+            git.checkout().setName(branch);
+
+            logger.debug("Parsing directory...");
             //build the model.
             model = GitRepositoryParser.buildModel(repoDir);
 
