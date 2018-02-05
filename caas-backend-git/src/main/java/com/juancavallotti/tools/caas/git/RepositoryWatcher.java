@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RepositoryWatcher {
 
@@ -34,19 +35,25 @@ public class RepositoryWatcher {
             final WatchKey key = dir.register(watcher,
                     StandardWatchEventKinds.ENTRY_CREATE,
                     StandardWatchEventKinds.ENTRY_DELETE,
-                    StandardWatchEventKinds.ENTRY_MODIFY);
+                    StandardWatchEventKinds.ENTRY_MODIFY
+            );
             final ExecutorService ex = Executors.newSingleThreadExecutor();
             ex.execute(() -> {
                 while (watching) {
                     try {
                         WatchKey event = watcher.take();
 
-                        //we probably want to run only where a real thing happens.
-                        event.pollEvents().forEach(watchEvent ->
-                                logger.debug("Event type: {}, Modified Files: {}, Contex: {}",
-                                        watchEvent.kind(), watchEvent.count(), watchEvent.context().toString()));
+                        final AtomicBoolean doRun = new AtomicBoolean(false);
 
-                        if (!event.pollEvents().isEmpty()) {
+                        //we probably want to run only where a real thing happens.
+                        event.pollEvents().forEach(watchEvent -> {
+                            logger.debug("Filesystem event type: {}, Modified Files: {}, Contex: {}",
+                                            watchEvent.kind(), watchEvent.count(), watchEvent.context().toString());
+                                    doRun.set(true);
+                                }
+                            );
+                        //even if we might get a lot of events, we just one to act on one of them.
+                        if (doRun.get()) {
                             logger.debug("Running action when directory change happens...");
                             try {
                                 changeAction.run();
