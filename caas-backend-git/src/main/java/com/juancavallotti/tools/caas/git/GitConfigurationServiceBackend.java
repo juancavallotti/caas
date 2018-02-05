@@ -34,6 +34,8 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     private Git git;
     private File repoDir;
+    private RepositoryWatcher watcher;
+
 
     public GitConfigurationServiceBackend() {
         logger.info(getServiceName());
@@ -41,14 +43,10 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     private GitRepositoryModel model;
 
-    private boolean running = true;
-
     @PostConstruct
     public void init() {
         logger.info("Loaded Git Configuration Service, backend url: {}, local repo path: {}", repoBackend, localPath);
         try {
-            repoDir = new File(localPath);
-
             logger.debug("Cloning or opening git repository...");
             GitRepository repo = new GitRepository(repoBackend, localPath, branch);
             git = repo.buildGit();
@@ -57,6 +55,8 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
                 logger.error("Error while connecting to GIT repository. Check settings.");
                 return;
             }
+
+            repoDir = git.getRepository().getWorkTree();
 
             logger.debug("Checking out specific branch {}", branch);
 
@@ -69,53 +69,13 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
             //build the model.
             model = GitRepositoryParser.buildModel(repoDir);
 
-            logger.debug("Registering a file system watcher to reload the model.");
-            final WatchService watcher = FileSystems.getDefault().newWatchService();
-
-            try {
-                final WatchKey key = repoDir.toPath().register(watcher,
-                        StandardWatchEventKinds.ENTRY_CREATE,
-                        StandardWatchEventKinds.ENTRY_DELETE,
-                        StandardWatchEventKinds.ENTRY_MODIFY);
-                final ExecutorService ex = Executors.newSingleThreadExecutor();
-                ex.execute(() -> {
-                    while (running) {
-                        try {
-                            WatchKey event = watcher.take();
-
-                            if (!event.pollEvents().isEmpty()) {
-                                logger.info("Repository has changed, will dynamically reload the model...");
-                                GitRepositoryModel repoModel = GitRepositoryParser.buildModel(repoDir);
-                                logger.info("Model reload complete...");
-                                model = repoModel;
-                            }
-
-                            event.reset();
-
-                        } catch (InterruptedException e) {
-                            logger.error("Error while polling filesystem.", ex);
-                        } catch (ClosedWatchServiceException err) {
-                            logger.error("Watch service stopped.");
-                            break;
-                        }
-                    }
-                });
-
-                logger.debug("Registering shutdown hook to release resources... " +
-                        "this can probably be better solved by spring.");
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    try {
-                        watcher.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    key.cancel();
-                    ex.shutdownNow();
-                }));
-
-            } catch (IOException ex) {
-                logger.error("Error while attempting to register filesystem watcher.");
-            }
+            watcher = new RepositoryWatcher().watch(repoDir.toPath(),
+                    () -> {
+                        logger.info("Repository has changed, will dynamically reload the model...");
+                        GitRepositoryModel repoModel = GitRepositoryParser.buildModel(repoDir);
+                        logger.info("Model reload complete...");
+                        model = repoModel;
+                    });
 
         } catch (Exception ex) {
             logger.error("Error while connecting to repository. ", ex);
@@ -126,7 +86,7 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
     @PreDestroy
     public void shutdown() {
         logger.debug("Shutting down... will try to clean up.");
-        running = false;
+        watcher.shutdown();
     }
 
 
