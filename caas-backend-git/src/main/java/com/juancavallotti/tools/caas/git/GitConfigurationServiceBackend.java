@@ -50,7 +50,8 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
             repoDir = new File(localPath);
 
             logger.debug("Cloning or opening git repository...");
-            git = new GitRepository(repoBackend, localPath, branch).buildGit();
+            GitRepository repo = new GitRepository(repoBackend, localPath, branch);
+            git = repo.buildGit();
 
             if (git == null) {
                 logger.error("Error while connecting to GIT repository. Check settings.");
@@ -58,10 +59,11 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
             }
 
             logger.debug("Checking out specific branch {}", branch);
-            git.checkout()
-                    .setName(branch)
-                    .setStartPoint("origin/" + branch)
-                    .call();
+
+            repo.checkoutBranch(git);
+
+            //print the current git status.
+            repo.printStatus(git, logger);
 
             logger.debug("Parsing directory...");
             //build the model.
