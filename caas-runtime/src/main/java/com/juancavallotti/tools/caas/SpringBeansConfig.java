@@ -6,13 +6,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.util.StringUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
@@ -42,6 +47,25 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
                 "accessing the following url ----> " +
                 "http://localhost:" + event.getEmbeddedServletContainer().getPort() + "/");
         logger.info("Loaded configuration from: " + configLocation);
+    }
+
+    @Bean
+    public FilterRegistrationBean configureCors() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("*");
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
+
+        source.registerCorsConfiguration("/api/**", config);
+
+        logger.debug("Registering CORS filter: {}", source);
+
+        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+        bean.setOrder(0);
+
+        return bean;
     }
 
     @Bean
