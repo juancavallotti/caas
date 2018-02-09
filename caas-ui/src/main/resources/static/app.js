@@ -18,6 +18,10 @@ var app = new Vue({
                 .catch(function (error) {
                     console.log(error)
                 });
+        },
+        buildDocumentLink: function(document) {
+            var coordinate = data.appConfig;
+            return data.url + "/" + coordinate.application + "/" + coordinate.version + "/" + coordinate.environment + "/dynamic/" + document.key
         }
     },
     mounted: function () {

@@ -54,7 +54,9 @@
                                 <div class="caas-documents-container">
                                     <dl class="row">
                                         <template v-for="(val) in appConfig.documents">
-                                            <dd class="col-sm-9 caas-actionable">{{val.key}}</dd>
+                                            <dd class="col-sm-9 caas-actionable">
+                                                <a v-bind:href="buildDocumentLink(val)" target="_blank"> {{val.key}}</a>
+                                            </dd>
                                             <dt class="col-sm-3">{{val.type}}</dt>
                                         </template>
                                     </dl>
