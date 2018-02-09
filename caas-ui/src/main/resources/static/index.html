@@ -16,6 +16,8 @@
                     <div class="caas-coordinates-container">
                         <h6>Applications</h6>
                         <hr />
+                        <input class="form-control mr-sm-2" type="search" placeholder="Search" v-model="filter" v-on:keyup="applications = filterApps()" />
+                        <hr />
                         <dl class="row" v-for="app in applications">
                             <dd class="col-sm-3 caas-actionable" v-on:click="load(app)">{{app.application}}</dd>
                             <dt class="col-sm-9">

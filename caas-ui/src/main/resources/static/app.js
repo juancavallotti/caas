@@ -1,6 +1,8 @@
 var data = {
     url: 'api/configuration',
     applications: [],
+    allApps: [],
+    filter: '',
     appConfig : null
 }
 
@@ -22,6 +24,14 @@ var app = new Vue({
         buildDocumentLink: function(document) {
             var coordinate = data.appConfig;
             return data.url + "/" + coordinate.application + "/" + coordinate.version + "/" + coordinate.environment + "/dynamic/" + document.key
+        },
+        filterApps: function() {
+
+            var ret = Array.from(data.allApps);
+
+            return ret.filter(function(item) {
+                return item.application.indexOf(data.filter) >= 0;
+            });
         }
     },
     mounted: function () {
@@ -40,7 +50,7 @@ var app = new Vue({
                 }
             })
 
-
+            data.allApps = Array.from(apps)
             data.applications = apps;
         }).catch(function (error) {
             console.log("Error while processing response", error);
