@@ -2,6 +2,7 @@ package com.juancavallotti.tools.caas.api;
 
 import com.juancavallotti.tools.caas.api.DefaultConfigurationElement;
 import com.juancavallotti.tools.caas.jaxrs.ext.PATCH;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.io.InputStream;
 import java.lang.Object;
@@ -11,8 +12,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 
+@CrossOrigin
 @Path("/configuration")
 public interface Configuration {
+
     @GET
     @Produces("application/json")
     @Consumes

@@ -1,3 +1,11 @@
-h1 {
+h1.customTitle {
     font-family: "Courier New";
+}
+
+.caas-sidebar-right {
+    border-left: #e8e8e8 1px solid;
+}
+
+.caas-sidebar-left {
+    border-right: #e8e8e8 1px solid;
 }
