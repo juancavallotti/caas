@@ -4,6 +4,7 @@ include (
         'caas-backend-mongo',
         'caas-backend-memory',
         'caas-runtime',
+        'caas-ui',
         'test-commons'
 )
 rootProject.name = 'caas'

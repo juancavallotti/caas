@@ -8,6 +8,7 @@ dependencies {
     compile project(':caas-backend-git')
     compile project(':caas-backend-mongo')
     compile project(':caas-backend-memory')
+    compile project(':caas-ui')
 
     //logging
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: logj4version
