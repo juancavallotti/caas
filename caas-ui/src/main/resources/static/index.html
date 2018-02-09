@@ -11,46 +11,74 @@
         </nav>
         <div id="content" class="container-fluid">
             <div class="row">
-                <div class="col-lg-3 caas-sidebar-left">
-                    <dl class="row" v-for="app in applications">
-                        <dd class="col-sm-3" v-on:click="load(app)">{{app.application}}</dd>
-                        <dt class="col-sm-9">
-                            <p>Version: {{app.version}}</p>
-                            <p>Environment: {{app.environment}}</p>
-                        </dd>
-                    </dl>
+                <!-- the applications list -->
+                <div class="col-lg-2 caas-sidebar-left caas-apps-panel">
+                    <div class="caas-coordinates-container">
+                        <h6>Applications</h6>
+                        <hr />
+                        <dl class="row" v-for="app in applications">
+                            <dd class="col-sm-3 caas-actionable" v-on:click="load(app)">{{app.application}}</dd>
+                            <dt class="col-sm-9">
+                                <p>V: {{app.version}}</p>
+                                <p>E: {{app.environment}}</p>
+                            </dd>
+                        </dl>
+                    </div>
                 </div>
-                <div class="col-lg-6" v-if="appConfig != null">
-                    <!-- display the current environment settings -->
+
+                <div class="col-lg-10 caas-main-panel" v-if="appConfig != null">
+                    <!-- the main panel -->
                     <h3>{{appConfig.application}}</h3>
-                    <h5>Version: {{appConfig.version}} | Environment: {{appConfig.environment}}</h5>
+                    <div class="row">
+                        <div class="col-lg-9">
+                            <!-- display the current environment settings -->
+                            <h5>Version: {{appConfig.version}} | Environment: {{appConfig.environment}}</h5>
+                            <hr />
 
-                    <div v-if="appConfig.properties">
-                        <h6>Properties:</h6>
-                        <dl class="row" v-for="(val, key) in appConfig.properties">
-                            <dd class="col-sm-3">{{key}}</dd>
-                            <dt class="col-sm-9">{{val}}</dt>
-                        </dl>
+                            <!-- the properties container -->
+                            <div v-if="appConfig.properties != null">
+                                <h6>Properties:</h6>
+                                <div class="caas-properties-continer">
+                                    <dl class="row">
+                                        <template v-for="(val, key) in appConfig.properties">
+                                            <dd class="col-sm-3">{{key}}</dd>
+                                            <dt class="col-sm-9">{{val}}</dt>
+                                        </template>
+                                    </dl>
+                                </div>
+                            </div>
+
+                            <!-- the documents container -->
+                            <div v-if="appConfig.documents != null && appConfig.documents.length > 0">
+                                <h6>Documents:</h6>
+                                <div class="caas-documents-container">
+                                    <dl class="row">
+                                        <template v-for="(val) in appConfig.documents">
+                                            <dd class="col-sm-9 caas-actionable">{{val.key}}</dd>
+                                            <dt class="col-sm-3">{{val.type}}</dt>
+                                        </template>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- the parents panel -->
+                        <div class="col-lg-3 caas-sidebar-right" v-if="appConfig != null && appConfig.parents.length > 0">
+                            <h6>Parents: </h6>
+                            <div class="caas-coordinates-container">
+                                <dl class="row">
+                                    <template v-for="app in appConfig.parents">
+                                        <dd class="col-sm-3 caas-actionable" v-on:click="load(app)">{{app.application}}</dd>
+                                        <dt class="col-sm-9">
+                                            <p>V: {{app.version}}</p>
+                                            <p>E: {{app.environment}}</p>
+                                        </dd>
+                                    </template>
+                                </dl>
+                            </div>
+                        </div>
                     </div>
-                    <div v-if="appConfig.documents">
-                        <h6>Documents:</h6>
-                        <dl class="row" v-for="(val) in appConfig.documents">
-                            <dd class="col-sm-3">{{val.key}}</dd>
-                            <dt class="col-sm-9">{{val.type}}</dt>
-                        </dl>
-                    </div>
-                </div>
-                <div class="col-lg-3 caas-sidebar-right" v-if="appConfig != null && appConfig.parents.length > 0">
-                    <h5>Parents: </h5>
-
-                    <dl class="row" v-for="app in appConfig.parents">
-                        <dd class="col-sm-3" v-on:click="load(app)">{{app.application}}</dd>
-                        <dt class="col-sm-9">
-                            <p>Version: {{app.version}}</p>
-                            <p>Environment: {{app.environment}}</p>
-                        </dd>
-                    </dl>
-
                 </div>
             </div>
         </div>

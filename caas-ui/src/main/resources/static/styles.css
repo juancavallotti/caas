@@ -6,6 +6,67 @@ h1.customTitle {
     border-left: #e8e8e8 1px solid;
 }
 
+
+.caas-main-panel .caas-sidebar-right {
+
+}
+
+.caas-coordinates-container h6 {
+    padding-top: 16px;
+}
+
 .caas-sidebar-left {
     border-right: #e8e8e8 1px solid;
 }
+
+.caas-coordinates-container {
+    font-size: small;
+}
+
+.caas-coordinates-container dd {
+    font-weight: bold;
+}
+
+.caas-coordinates-container dt {
+    font-weight: normal;
+}
+
+.caas-coordinates-container dt p {
+    margin-bottom: 0px;
+}
+
+.caas-apps-panel {
+    background-color: #eaeaea;
+}
+
+.caas-main-panel {
+    padding-top: 16px;
+}
+
+.caas-properties-continer {
+    font-weight: normal;
+    font-family: "Courier New";
+    font-size: small;
+}
+.caas-documents-container {
+    font-size: small;
+}
+
+.caas-documents-container dd {
+    font-weight: bold;
+}
+
+.caas-documents-container dt {
+    font-weight: lighter;
+    font-style: italic;
+    color: #bababa;
+}
+
+.caas-actionable {
+    cursor: pointer;
+}
+
+.caas-actionable:hover {
+    text-decoration: underline;
+}
+
