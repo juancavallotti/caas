@@ -6,6 +6,9 @@ h1.customTitle {
     border-left: #e8e8e8 1px solid;
 }
 
+.caas-env-combo {
+    margin-top: 16px;
+}
 
 .caas-main-panel .caas-sidebar-right {
 

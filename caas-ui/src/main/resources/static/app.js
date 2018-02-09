@@ -3,7 +3,9 @@ var data = {
     applications: [],
     allApps: [],
     filter: '',
-    appConfig : null
+    appConfig : null,
+    environments: [''],
+    selEnvironment: ''
 }
 
 var app = new Vue({
@@ -30,7 +32,14 @@ var app = new Vue({
             var ret = Array.from(data.allApps);
 
             return ret.filter(function(item) {
-                return item.application.indexOf(data.filter) >= 0;
+
+                var isEnvironment = true;
+
+                if (!data.selEnvironment.length == 0) {
+                    isEnvironment = item.environment == data.selEnvironment;
+                }
+
+                return item.application.indexOf(data.filter) >= 0 && isEnvironment;
             });
         }
     },
@@ -41,7 +50,12 @@ var app = new Vue({
 
             var apps = response.data;
 
-            apps.sort(function(a, b) {
+            //reuse the sort function to populate the environments
+            apps = apps.sort(function(a, b) {
+
+                if (!data.environments.includes(a.environment)) {
+                    data.environments.push(a.environment);
+                }
 
                 if (a.application < b.application && a.version < b.version && a.environment < b.environment) {
                     return -1;
@@ -49,6 +63,8 @@ var app = new Vue({
                     return 1;
                 }
             })
+
+            data.environments = data.environments.sort();
 
             data.allApps = Array.from(apps)
             data.applications = apps;

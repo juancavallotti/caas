@@ -14,7 +14,14 @@
                 <!-- the applications list -->
                 <div class="col-lg-2 caas-sidebar-left caas-apps-panel">
                     <div class="caas-coordinates-container">
-                        <h6>Applications</h6>
+                        <div class="row">
+                            <h6 class="col-sm-8">Applications</h6>
+                            <div class="col-sm-4 caas-env-combo">
+                                <select v-model="selEnvironment" v-on:change="applications = filterApps()">
+                                    <option v-bind:title="env" v-for="env in environments">{{env}}</option>
+                                </select>
+                            </div>
+                        </div>
                         <hr />
                         <input class="form-control mr-sm-2" type="search" placeholder="Search" v-model="filter" v-on:keyup="applications = filterApps()" />
                         <hr />
