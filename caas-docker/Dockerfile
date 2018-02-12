@@ -15,7 +15,7 @@ WORKDIR /opt/caas
 RUN mkdir data
 COPY ./caas-docker/config.properties /opt/caas/conf/config.properties
 # Define mount points
-VOLUME ["/opt/caas/data"]
+VOLUME ["/opt/caas/conf", "/opt/caas/data"]
 # Configure external access:
 # Expose HTTP Endpoint
 EXPOSE 8080

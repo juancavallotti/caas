@@ -47,5 +47,6 @@ applicationDefaultJvmArgs = [
         '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
         '--add-modules', 'java.xml.bind',
         '-Dconfig.location=file:conf/config.properties',
+        '-Dlogging.config=conf/log4j2.xml',
         '--illegal-access=warn'
 ]
