@@ -53,6 +53,7 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
             if (git == null) {
                 logger.error("Error while connecting to GIT repository. Check settings.");
+                model = new GitRepositoryModel(Collections.emptyList(), Collections.emptyList());
                 return;
             }
 

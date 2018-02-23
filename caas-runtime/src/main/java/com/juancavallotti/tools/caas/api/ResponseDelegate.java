@@ -22,15 +22,9 @@ import javax.ws.rs.core.Response;
 public class ResponseDelegate extends Response {
   private final Response delegate;
 
-  private final Object entity;
-
-  protected ResponseDelegate(Response delegate, Object entity) {
-    this.delegate = delegate;
-    this.entity = entity;
-  }
 
   protected ResponseDelegate(Response delegate) {
-    this(delegate, null);
+    this.delegate = delegate;
   }
 
   @Override
@@ -120,7 +114,8 @@ public class ResponseDelegate extends Response {
 
   @Override
   public Object getEntity() {
-    return this.entity;}
+    return this.delegate.getEntity();
+  }
 
   @Override
   public Response.StatusType getStatusInfo() {

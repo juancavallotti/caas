@@ -3,7 +3,10 @@ package com.juancavallotti.tools.caas.spi;
 import com.juancavallotti.tools.caas.api.*;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public interface ConfigurationServiceBackend {
 
@@ -128,5 +131,17 @@ public interface ConfigurationServiceBackend {
      */
     default <T extends ConfigurationElement> List<T> createNewVersion(String appName, String version, String targetVersion) throws ConfigurationServiceBackendException {
         throw ConfigurationServiceBackendException.notSupported();
+    }
+
+
+    default List<String> implementedFunctionality() {
+
+        Method[] methods = getClass().getMethods();
+
+        return Arrays.stream(methods)
+                .filter(m -> m.getDeclaringClass() == getClass())
+                .map(m -> m.getName())
+                .collect(Collectors.toList());
+
     }
 }
