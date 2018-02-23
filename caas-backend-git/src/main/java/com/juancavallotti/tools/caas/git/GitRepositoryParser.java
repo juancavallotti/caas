@@ -84,7 +84,7 @@ public class GitRepositoryParser {
         File[] candidateEnvs = versionPath
                 .listFiles((FileFilter) (pathname -> pathname.isFile() && pathname.getName().endsWith(ModelConventions.ENVIRONMENT_PROPS_EXTENSION)));
 
-        logger.debug("Found properties Files", candidateEnvs);
+        logger.debug("Found properties files {}", (Object) candidateEnvs);
 
         Arrays.stream(candidateEnvs).forEach(envPath -> {
             parseVersionFolderEntry(settings, context, envPath);
