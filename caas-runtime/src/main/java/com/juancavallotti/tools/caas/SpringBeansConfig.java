@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationListener;
@@ -17,6 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -40,12 +42,26 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
     @Value("${"+ RUNTIME_BACKEND +":}")
     private String backend;
 
+    @Inject
+    private ServerProperties serverConfig;
+
     @Override
     public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
         logger.info("CaaS Service is Running");
+
+        //various parameters of the server.
+        String host = serverConfig.getAddress() == null ? "localhost" : serverConfig.getAddress().getHostName();
+        String port = Integer.toString(event.getEmbeddedServletContainer().getPort());
+        String path = serverConfig.getContextPath();
+        String protocol = serverConfig.getSsl() != null && serverConfig.getSsl().isEnabled() ? "https" : "http";
+
+        if (path == null) {
+            path = "";
+        }
+
         logger.info("You may access CaaS API Console by " +
                 "accessing the following url ----> " +
-                "http://localhost:" + event.getEmbeddedServletContainer().getPort() + "/");
+                "{}://{}:{}{}", protocol, host, port, path);
         logger.info("Loaded configuration from: " + configLocation);
     }
 
