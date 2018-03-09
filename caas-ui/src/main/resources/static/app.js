@@ -1,5 +1,5 @@
 var data = {
-    url: 'http://localhost:8080/api/configuration',
+    url: '/api/configuration',
     applications: [],
     allApps: [],
     filter: '',

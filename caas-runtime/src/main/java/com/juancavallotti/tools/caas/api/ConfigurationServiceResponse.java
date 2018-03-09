@@ -42,6 +42,13 @@ public class ConfigurationServiceResponse extends ResponseDelegate {
         );
     }
 
+    public static ConfigurationServiceResponse respondOperationNotSupported() {
+        return wrap(
+                status(404)
+                .entity(Map.of("message", "Operation not supported"))
+                .type(MediaType.APPLICATION_JSON));
+    }
+
     public static ConfigurationServiceResponse respond400WithApplicationJson(Object body) {
         return wrap(
                 status(400)

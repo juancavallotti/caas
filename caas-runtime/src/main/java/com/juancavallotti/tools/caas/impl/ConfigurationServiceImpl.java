@@ -27,7 +27,7 @@ public class ConfigurationServiceImpl implements Configuration {
         } catch (ConfigurationServiceBackendException ex) {
             switch (ex.getCauseType()) {
                 case OPERATION_NOT_SUPPORTED:
-                    return ConfigurationServiceResponse.respond400WithApplicationJson(status("Not supported"));
+                    return ConfigurationServiceResponse.respondOperationNotSupported();
                 default:
                     logger.error("Unknown backend exception", ex);
                     return ConfigurationServiceResponse.respond500();
@@ -49,7 +49,7 @@ public class ConfigurationServiceImpl implements Configuration {
                 case ENTITY_NOT_FOUND:
                     return ConfigurationServiceResponse.respond400WithApplicationJson(status(ex.getMessage()));
                 case OPERATION_NOT_SUPPORTED:
-                    return ConfigurationServiceResponse.respond400WithApplicationJson(status("Not supported"));
+                    return ConfigurationServiceResponse.respondOperationNotSupported();
                 default:
                     logger.error("Unknown backend exception", ex);
                     return ConfigurationServiceResponse.respond500();
@@ -66,7 +66,7 @@ public class ConfigurationServiceImpl implements Configuration {
         } catch (ConfigurationServiceBackendException ex) {
             switch (ex.getCauseType()) {
                 case OPERATION_NOT_SUPPORTED:
-                    return ConfigurationServiceResponse.respond400WithApplicationJson(status("Not supported"));
+                    return ConfigurationServiceResponse.respondOperationNotSupported();
                 case VALIDATION:
                     return ConfigurationServiceResponse.respond400WithApplicationJson(status(ex.getMessage()));
                 case ENTITY_NOT_FOUND:
@@ -105,7 +105,7 @@ public class ConfigurationServiceImpl implements Configuration {
                 case VALIDATION:
                     return ConfigurationServiceResponse.respond400WithApplicationJson(status(ex.getMessage()));
                 case OPERATION_NOT_SUPPORTED:
-                    return ConfigurationServiceResponse.respond400WithApplicationJson(status("Not supported"));
+                    return ConfigurationServiceResponse.respondOperationNotSupported();
             }
             logger.error("Unknown backend exception", ex);
             return ConfigurationServiceResponse.respond500();
@@ -130,7 +130,7 @@ public class ConfigurationServiceImpl implements Configuration {
                 case VALIDATION:
                     return ConfigurationServiceResponse.respond400WithApplicationJson(status(ex.getMessage()));
                 case OPERATION_NOT_SUPPORTED:
-                    return ConfigurationServiceResponse.respond400WithApplicationJson(status("Not supported"));
+                    return ConfigurationServiceResponse.respondOperationNotSupported();
             }
             logger.error("Unknown backend exception", ex);
             return ConfigurationServiceResponse.respond500();
@@ -170,6 +170,8 @@ public class ConfigurationServiceImpl implements Configuration {
             switch (ex.getCauseType()) {
                 case ENTITY_NOT_FOUND:
                     return ConfigurationServiceResponse.respond400WithApplicationJson(status(ex.getMessage()));
+                case OPERATION_NOT_SUPPORTED:
+                    return ConfigurationServiceResponse.respondOperationNotSupported();
                 default:
                     logger.error("Unknown backend exception", ex);
                     return ConfigurationServiceResponse.respond500();
@@ -191,7 +193,7 @@ public class ConfigurationServiceImpl implements Configuration {
                 case VALIDATION:
                     return ConfigurationServiceResponse.respond400WithApplicationJson(status(ex.getMessage()));
                 case OPERATION_NOT_SUPPORTED:
-                    return ConfigurationServiceResponse.respond400WithApplicationJson(status("Not supported"));
+                    return ConfigurationServiceResponse.respondOperationNotSupported();
                 default:
                     logger.error("Unknown backend exception", ex);
                     return ConfigurationServiceResponse.respond500();
