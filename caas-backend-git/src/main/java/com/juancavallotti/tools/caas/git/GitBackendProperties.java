@@ -3,8 +3,10 @@ package com.juancavallotti.tools.caas.git;
 import com.juancavallotti.tools.caas.spi.BackendProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("gitbackend")
+@ConfigurationProperties(GitBackendProperties.PROPERTIES_PREFIX)
 public class GitBackendProperties implements BackendProperties {
+
+    static final String PROPERTIES_PREFIX = "gitbackend";
 
     private String repoUrl;
 
@@ -34,5 +36,10 @@ public class GitBackendProperties implements BackendProperties {
 
     public void setLocalPath(String localPath) {
         this.localPath = localPath;
+    }
+
+    @Override
+    public String getPropertiesPrefix() {
+        return PROPERTIES_PREFIX;
     }
 }

@@ -42,6 +42,9 @@ public class AdminImpl implements Admin{
 
         backendInfo.put("class", runtimeConfig.getBackend());
         backendInfo.put("serviceName", currentBackend.printServiceName());
+        if (currentBackend.backendConfiguration().isPresent()) {
+            backendInfo.put("settings", currentBackend.backendConfiguration().get());
+        }
         backendInfo.put("implementsOperations", currentBackend.implementedFunctionality());
 
     }
