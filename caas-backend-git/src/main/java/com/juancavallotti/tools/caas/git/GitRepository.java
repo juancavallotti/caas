@@ -24,10 +24,10 @@ public class GitRepository {
     private final String localPath;
     private final String branch;
 
-    public GitRepository(String remotePath, String localPath, String branch) {
-        this.remotePath = remotePath;
-        this.localPath = localPath;
-        this.branch = branch;
+    public GitRepository(GitBackendProperties props) {
+        this.remotePath = props.getRepoUrl();
+        this.localPath = props.getLocalPath();
+        this.branch = props.getBranch();
     }
 
     public Git buildGit() {

@@ -3,11 +3,13 @@ package com.juancavallotti.tools.caas.git;
 import com.juancavallotti.tools.caas.api.*;
 import com.juancavallotti.tools.caas.git.model.GitConfigCoordinate;
 import com.juancavallotti.tools.caas.git.model.GitRepositoryModel;
+import com.juancavallotti.tools.caas.spi.BackendProperties;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
@@ -23,14 +25,8 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     private static final Logger logger = LoggerFactory.getLogger(GitConfigurationServiceBackend.class);
 
-    @Value("${gitbackend.repoUrl}")
-    private String repoBackend;
-
-    @Value("${gitbackend.branch:master}")
-    private String branch;
-
-    @Value("${gitbackend.localPath}")
-    private String localPath;
+    @Autowired
+    private GitBackendProperties settings;
 
     private Git git;
     private File repoDir;
@@ -45,10 +41,10 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
     @PostConstruct
     public void init() {
-        logger.info("Loaded Git Configuration Service, backend url: {}, local repo path: {}", repoBackend, localPath);
+        logger.info("Loaded Git Configuration Service, backend url: {}, local repo path: {}", settings.getRepoUrl(), settings.getLocalPath());
         try {
             logger.debug("Cloning or opening git repository...");
-            GitRepository repo = new GitRepository(repoBackend, localPath, branch);
+            GitRepository repo = new GitRepository(settings);
             git = repo.buildGit();
 
             if (git == null) {
@@ -59,7 +55,7 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
 
             repoDir = git.getRepository().getWorkTree();
 
-            logger.debug("Checking out specific branch {}", branch);
+            logger.debug("Checking out specific branch {}", settings.getBranch());
 
             repo.checkoutBranch(git);
 
@@ -128,4 +124,8 @@ public class GitConfigurationServiceBackend implements ConfigurationServiceBacke
                 .build();
     }
 
+    @Override
+    public Optional<BackendProperties> backendConfiguration() {
+        return Optional.of(settings);
+    }
 }

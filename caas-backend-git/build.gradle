@@ -7,7 +7,9 @@ dependencies {
 
     //spring
     compile group: 'org.springframework', name: 'spring-core', version: springVersion
+    compile group: 'org.springframework', name: 'spring-context', version: springVersion
     compile group: 'org.springframework', name: 'spring-beans', version: springVersion
+    compile group: 'org.springframework.boot', name: 'spring-boot', version: springBootVersion
 
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.17'
 }
