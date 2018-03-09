@@ -4,8 +4,7 @@ import com.juancavallotti.tools.caas.api.*;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface ConfigurationServiceBackend {
@@ -136,12 +135,26 @@ public interface ConfigurationServiceBackend {
 
     default List<String> implementedFunctionality() {
 
-        Method[] methods = getClass().getMethods();
+        Method[] methods = getClass().getDeclaredMethods();
+        Method[] ifaceMethods = ConfigurationServiceBackend.class.getMethods();
 
-        return Arrays.stream(methods)
-                .filter(m -> m.getDeclaringClass() == getClass())
+        //cache the methods for future use
+        Map<String, Method> methodsMap = Arrays.stream(ifaceMethods)
+                .collect(Collectors.toMap(m -> m.getName(), m -> m));
+
+        //the intersection of the two will be what we look for.
+        Set<String> ifaceMethodsSet = Arrays.stream(ifaceMethods)
                 .map(m -> m.getName())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
+        Set<String> methodsSet = Arrays.stream(methods)
+                .map(m -> m.getName())
+                .collect(Collectors.toSet());
+
+        methodsSet.retainAll(ifaceMethodsSet);
+
+        return methodsSet.stream()
+                .map(m -> methodsMap.get(m).toString())
+                .collect(Collectors.toList());
     }
 }
