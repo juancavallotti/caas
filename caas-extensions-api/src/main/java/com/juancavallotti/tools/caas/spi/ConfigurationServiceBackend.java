@@ -133,6 +133,16 @@ public interface ConfigurationServiceBackend {
     }
 
 
+    /**
+     * Get the details of the methods implemented by Service Provider. This method returns the intersection of methods
+     * defined in this interface (whether they're default or not) and the declared methods in the concrete class.
+     *
+     * NOTE: This method will not look for class hierarchy, so in order for it to work the expected way, only one level
+     * of inheritance will be allowed. The implementation can always override it to provide a more accurate description
+     * of the service.
+     *
+     * @return a list of Strings representing the methods that has been implemented by the Service Provider.
+     */
     default List<String> implementedFunctionality() {
 
         Method[] methods = getClass().getDeclaredMethods();
@@ -156,5 +166,15 @@ public interface ConfigurationServiceBackend {
         return methodsSet.stream()
                 .map(m -> methodsMap.get(m).toString())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieve the configuration properties specific to this backend implementation. This is for informative purposes
+     * only and implementation is completely optional.
+     *
+     * @return An implementation of {@link BackendProperties} interface.
+     */
+    default Optional<BackendProperties> backendConfiguration() {
+        return Optional.empty();
     }
 }
