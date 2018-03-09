@@ -1,5 +1,6 @@
 package com.juancavallotti.tools.caas;
 
+import com.juancavallotti.tools.caas.config.RuntimeConfigProperties;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +31,7 @@ import static com.juancavallotti.tools.caas.RuntimeProperties.*;
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan(basePackages = "com.juancavallotti.tools")
+@EnableConfigurationProperties(RuntimeConfigProperties.class)
 @PropertySource(value = "${"+ CONFIG_LOCATION + ":" + SpringBeansConfig.DEFAULT_CONFIG_LOCATION + " }", ignoreResourceNotFound = false)
 public class SpringBeansConfig implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
@@ -39,8 +42,8 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
     @Value("${" + CONFIG_LOCATION + ":"+ DEFAULT_CONFIG_LOCATION +"}")
     private String configLocation;
 
-    @Value("${"+ RUNTIME_BACKEND +":}")
-    private String backend;
+    @Inject
+    private RuntimeConfigProperties runtimeConfig;
 
     @Inject
     private ServerProperties serverConfig;
@@ -89,7 +92,7 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
 
         ServiceLoader<ConfigurationServiceBackend> sl = ServiceLoader.load(ConfigurationServiceBackend.class);
 
-        if (StringUtils.isEmpty(backend)) {
+        if (StringUtils.isEmpty(runtimeConfig.getBackend())) {
 
             Optional<ConfigurationServiceBackend> ret = sl.findFirst();
 
@@ -107,14 +110,14 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
 
         //get named backend.
         ServiceLoader.Provider<ConfigurationServiceBackend> ret = sl.stream()
-                .filter(provider -> backend.equals(provider.type().getName()))
+                .filter(provider -> runtimeConfig.getBackend().equals(provider.type().getName()))
                 .findFirst().orElse(null);
 
         if (ret != null) {
             return ret.get();
         }
 
-        logger.error("Backend {} not found.", backend);
+        logger.error("Backend {} not found.", runtimeConfig.getBackend());
         logger.error("Available backends are:");
 
         sl.stream().forEach(backend -> logger.error("\t{}", backend.type().getName()));
