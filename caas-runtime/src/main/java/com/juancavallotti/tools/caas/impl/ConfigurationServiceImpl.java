@@ -3,7 +3,7 @@ package com.juancavallotti.tools.caas.impl;
 import com.juancavallotti.tools.caas.api.*;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
-import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataPreProcessor;
+import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class ConfigurationServiceImpl implements Configuration {
     private ConfigurationServiceBackend backend;
 
     @Autowired
-    private List<ConfigurationServiceDataPreProcessor> preProcessors;
+    private List<ConfigurationServiceDataProcessor> processors;
 
     @Override
     public ConfigurationServiceResponse getConfiguration() {
@@ -223,7 +223,7 @@ public class ConfigurationServiceImpl implements Configuration {
     private ConfigurationElement preProcessWriteEntity(String opName, ConfigurationElement configurationElement) {
         ConfigurationElement ret = configurationElement;
 
-        for(ConfigurationServiceDataPreProcessor preProcessor : preProcessors) {
+        for(ConfigurationServiceDataProcessor preProcessor : processors) {
             ret = preProcessor.processWriteConfig(opName, ret);
         }
 
@@ -235,9 +235,9 @@ public class ConfigurationServiceImpl implements Configuration {
 
         logger.debug("Post processing read, operation: {}", opName);
 
-        for(ConfigurationServiceDataPreProcessor preProcessor : preProcessors) {
-            logger.debug("Calling processor: {}", preProcessor.getClass().getName());
-            ret = preProcessor.processReadConfig(opName, ret);
+        for(ConfigurationServiceDataProcessor processor : processors) {
+            logger.debug("Calling processor: {}", processor.getClass().getName());
+            ret = processor.processReadConfig(opName, ret);
         }
 
         return ret;

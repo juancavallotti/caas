@@ -2,7 +2,7 @@ package com.juancavallotti.tools.caas;
 
 import com.juancavallotti.tools.caas.config.RuntimeConfigProperties;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
-import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataPreProcessor;
+import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -130,9 +130,9 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
 
 
     @Bean
-    public List<ConfigurationServiceDataPreProcessor> findPreProcessors() {
+    public List<ConfigurationServiceDataProcessor> findPreProcessors() {
 
-        ServiceLoader<ConfigurationServiceDataPreProcessor> sl = ServiceLoader.load(ConfigurationServiceDataPreProcessor.class);
+        ServiceLoader<ConfigurationServiceDataProcessor> sl = ServiceLoader.load(ConfigurationServiceDataProcessor.class);
 
         List<String> enabledProcessors = runtimeConfig.getEnabledDataPreProcessors();
 

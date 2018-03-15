@@ -7,7 +7,7 @@ import com.juancavallotti.tools.caas.api.DocumentData;
  * SPI to define how a the configuration process the data, this could be of several uses such as encrypting the data,
  * changing the shape of the data for storage, and other uses.
  */
-public interface ConfigurationServiceDataPreProcessor {
+public interface ConfigurationServiceDataProcessor {
 
     /**
      * Informs whether this service provider is enabled by default or not.

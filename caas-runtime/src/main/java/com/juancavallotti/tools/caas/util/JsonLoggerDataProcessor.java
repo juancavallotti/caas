@@ -3,13 +3,13 @@ package com.juancavallotti.tools.caas.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.juancavallotti.tools.caas.api.ConfigurationElement;
-import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataPreProcessor;
+import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonLoggerDataPreProcessor implements ConfigurationServiceDataPreProcessor {
+public class JsonLoggerDataProcessor implements ConfigurationServiceDataProcessor {
 
-    private static final Logger logger = LoggerFactory.getLogger(JsonLoggerDataPreProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonLoggerDataProcessor.class);
 
     private ObjectMapper om = new ObjectMapper();
 
