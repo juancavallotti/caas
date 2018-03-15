@@ -3,6 +3,7 @@ package com.juancavallotti.tools.caas.impl;
 import com.juancavallotti.tools.caas.api.*;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
+import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataPreProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ public class ConfigurationServiceImpl implements Configuration {
 
     @Autowired
     private ConfigurationServiceBackend backend;
+
+    @Autowired
+    private List<ConfigurationServiceDataPreProcessor> preProcessors;
 
     @Override
     public ConfigurationServiceResponse getConfiguration() {
@@ -39,8 +43,10 @@ public class ConfigurationServiceImpl implements Configuration {
     @Override
     public ConfigurationServiceResponse postConfiguration(DefaultConfigurationElement entity) {
 
+        logger.debug("Trying to post a new configuration...");
         try {
-            backend.createNewConfiguration(entity);
+            ConfigurationElement processedEntity = preProcessWriteEntity("postConfiguration" ,entity);
+            backend.createNewConfiguration(processedEntity);
             return ConfigurationServiceResponse.respond202();
         } catch (ConfigurationServiceBackendException ex) {
             switch (ex.getCauseType()) {
@@ -80,8 +86,12 @@ public class ConfigurationServiceImpl implements Configuration {
 
     @Override
     public ConfigurationServiceResponse getApplicationConfiguration(String app, String version, String env) {
+        logger.debug("Called GET for app config with coordinates {} {} {}", app, version, env);
         try {
-            return ConfigurationServiceResponse.respond200WithApplicationJson(backend.findConfiguration(app, version, env));
+            ConfigurationElement elm = backend.findConfiguration(app, version, env);
+            elm = postProcessReadEntity("getApplicationConfiguration", elm);
+
+            return ConfigurationServiceResponse.respond200WithApplicationJson(elm);
         } catch (ConfigurationServiceBackendException ex) {
             return ConfigurationServiceResponse.respond404WithTextPlain("Not Found");
         }
@@ -95,8 +105,10 @@ public class ConfigurationServiceImpl implements Configuration {
         //user may be sending some values in the json, we don't want them we want the path params.
         entity = coordinate(app, version, env, entity);
 
+        ConfigurationElement preProcessed = preProcessWriteEntity("putConfiguration", entity);
+
         try {
-            backend.replaceConfiguration(entity);
+            backend.replaceConfiguration(preProcessed);
             return ConfigurationServiceResponse.respond202();
         } catch (ConfigurationServiceBackendException ex) {
 
@@ -120,8 +132,10 @@ public class ConfigurationServiceImpl implements Configuration {
         //user may be sending some values in the json, we don't want them we want the path params.
         entity = coordinate(app, version, env, entity);
 
+        ConfigurationElement preProcessed = preProcessWriteEntity("patchConfiguration", entity);
+
         try {
-            backend.patchConfiguration(entity);
+            backend.patchConfiguration(preProcessed);
             return ConfigurationServiceResponse.respond202();
         } catch (ConfigurationServiceBackendException ex) {
 
@@ -139,6 +153,8 @@ public class ConfigurationServiceImpl implements Configuration {
 
     @Override
     public ConfigurationServiceResponse getConfigurationDynamic(String app, String version, String env, String key) {
+
+        logger.debug("Called GET for app document with coordinates {} {} {} and key", app, version, env, key);
 
         ConfigCoordinate coordinate = coordinate(app, version, env);
 
@@ -182,6 +198,8 @@ public class ConfigurationServiceImpl implements Configuration {
     @Override
     public ConfigurationServiceResponse postConfigurationPromote(String app, String version, String env, String targetEnv) {
 
+        logger.debug("Called POST configuration promote with coordinates {} {} {} and targetEnv", app, version, env, targetEnv);
+
         ConfigCoordinate coordinate = coordinate(app, version, env);
 
         try {
@@ -201,6 +219,29 @@ public class ConfigurationServiceImpl implements Configuration {
         }
     }
 
+
+    private ConfigurationElement preProcessWriteEntity(String opName, ConfigurationElement configurationElement) {
+        ConfigurationElement ret = configurationElement;
+
+        for(ConfigurationServiceDataPreProcessor preProcessor : preProcessors) {
+            ret = preProcessor.processWriteConfig(opName, ret);
+        }
+
+        return ret;
+    }
+
+    private ConfigurationElement postProcessReadEntity(String opName, ConfigurationElement configurationElement) {
+        ConfigurationElement ret = configurationElement;
+
+        logger.debug("Post processing read, operation: {}", opName);
+
+        for(ConfigurationServiceDataPreProcessor preProcessor : preProcessors) {
+            logger.debug("Calling processor: {}", preProcessor.getClass().getName());
+            ret = preProcessor.processReadConfig(opName, ret);
+        }
+
+        return ret;
+    }
 
     private Map<String, String> status(String status) {
         return Map.of("status", status);

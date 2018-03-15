@@ -2,6 +2,7 @@ package com.juancavallotti.tools.caas;
 
 import com.juancavallotti.tools.caas.config.RuntimeConfigProperties;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
+import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataPreProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 
 import static com.juancavallotti.tools.caas.RuntimeProperties.*;
@@ -124,6 +126,25 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
 
         throw new RuntimeException("No suitable backend found.");
 
+    }
+
+
+    @Bean
+    public List<ConfigurationServiceDataPreProcessor> findPreProcessors() {
+
+        ServiceLoader<ConfigurationServiceDataPreProcessor> sl = ServiceLoader.load(ConfigurationServiceDataPreProcessor.class);
+
+        List<String> enabledProcessors = runtimeConfig.getEnabledDataPreProcessors();
+
+        return sl.stream()
+                .filter(dpp -> {
+                    if (enabledProcessors.contains(dpp.type().getName())) {
+                        return true;
+                    }
+                    //maybe is enabled by default.
+                    return dpp.get().enabledByDefault();
+                }).map(dpp -> dpp.get())
+                .collect(Collectors.toList());
     }
 
 }
