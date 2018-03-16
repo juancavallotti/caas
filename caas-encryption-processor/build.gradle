@@ -1,0 +1,7 @@
+dependencies {
+    //libraries
+    compile project(':caas-extensions-api')
+
+    compile "org.springframework.boot:spring-boot:${springBootVersion}"
+
+}

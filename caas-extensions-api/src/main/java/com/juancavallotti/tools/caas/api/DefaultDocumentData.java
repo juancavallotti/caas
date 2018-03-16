@@ -6,31 +6,31 @@ public class DefaultDocumentData implements DocumentData {
 
     private Document document;
 
-    private InputStream inputStream;
+    private InputStream data;
 
     public DefaultDocumentData() {
     }
 
-    public DefaultDocumentData(Document document, InputStream inputStream) {
+    public DefaultDocumentData(Document document, InputStream data) {
         this.document = document;
-        this.inputStream = inputStream;
+        this.data = data;
     }
 
     @Override
     public Document getDocument() {
-        return null;
+        return document;
     }
 
     @Override
     public InputStream getData() {
-        return null;
+        return data;
     }
 
     public void setDocument(Document document) {
         this.document = document;
     }
 
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
+    public void setData(InputStream inputStream) {
+        this.data = inputStream;
     }
 }

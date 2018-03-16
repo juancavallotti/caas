@@ -3,6 +3,7 @@ include (
         'caas-backend-git',
         'caas-backend-mongo',
         'caas-backend-memory',
+        'caas-encryption-processor',
         'caas-runtime',
         'caas-ui',
         'test-commons'
