@@ -160,6 +160,9 @@ public class ConfigurationServiceImpl implements Configuration {
 
         try {
             DocumentData data = backend.getDocumentData(coordinate, key);
+
+            data = postProcessReadDocument("getConfigurationDynamic", data);
+
             return ConfigurationServiceResponse.respond200WithContentType(data.getData(), data.getDocument().getType());
         } catch (ConfigurationServiceBackendException ex) {
             switch (ex.getCauseType()) {
@@ -179,8 +182,15 @@ public class ConfigurationServiceImpl implements Configuration {
 
         ConfigCoordinate coordinate = coordinate(app, version, env);
 
+        DocumentData documentData = new DefaultDocumentData(new DefaultDocument(key, contentType), body);
+
+        documentData = preProcessSaveDocument("putConfigurationDynamic", documentData);
+
         try {
-            backend.setDocument(coordinate, key, contentType, body);
+            //TODO - Improve the interface to take DocumentData instead of separate params.
+            backend.setDocument(coordinate, documentData.getDocument().getKey()
+                    , documentData.getDocument().getType()
+                    , documentData.getData());
             return ConfigurationServiceResponse.respond202();
         } catch (ConfigurationServiceBackendException ex) {
             switch (ex.getCauseType()) {
@@ -222,9 +232,11 @@ public class ConfigurationServiceImpl implements Configuration {
 
     private ConfigurationElement preProcessWriteEntity(String opName, ConfigurationElement configurationElement) {
         ConfigurationElement ret = configurationElement;
+        logger.debug("Pre processing write, operation: {}", opName);
 
-        for(ConfigurationServiceDataProcessor preProcessor : processors) {
-            ret = preProcessor.processWriteConfig(opName, ret);
+        for(ConfigurationServiceDataProcessor processor : processors) {
+            logger.debug("Calling processor: {}", processor.getClass().getName());
+            ret = processor.processWriteConfig(opName, ret);
         }
 
         return ret;
@@ -242,6 +254,35 @@ public class ConfigurationServiceImpl implements Configuration {
 
         return ret;
     }
+
+
+    private DocumentData preProcessSaveDocument(String opName, DocumentData document) {
+
+        DocumentData ret = document;
+        logger.debug("Pre processing save document, operation: {}", opName);
+
+        for(ConfigurationServiceDataProcessor processor : processors) {
+            logger.debug("Calling processor: {}", processor.getClass().getName());
+            ret = processor.processWriteDocument(opName, ret);
+        }
+
+        return ret;
+    }
+
+    private DocumentData postProcessReadDocument(String opName, DocumentData document) {
+
+        DocumentData ret = document;
+        logger.debug("Post processing read document, operation: {}", opName);
+
+        for(ConfigurationServiceDataProcessor processor : processors) {
+            logger.debug("Calling processor: {}", processor.getClass().getName());
+            ret = processor.processReadDocument(opName, ret);
+        }
+
+        return ret;
+    }
+
+
 
     private Map<String, String> status(String status) {
         return Map.of("status", status);

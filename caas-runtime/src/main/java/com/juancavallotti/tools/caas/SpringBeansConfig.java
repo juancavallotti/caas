@@ -6,21 +6,23 @@ import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,9 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
 
     @Inject
     private ServerProperties serverConfig;
+
+    @Inject
+    private ApplicationContext appContext;
 
     @Override
     public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
@@ -128,7 +133,6 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
 
     }
 
-
     @Bean
     public List<ConfigurationServiceDataProcessor> findPreProcessors() {
 
@@ -143,8 +147,16 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
                     }
                     //maybe is enabled by default.
                     return dpp.get().enabledByDefault();
-                }).map(dpp -> dpp.get())
+                }).map(dpp -> {
+
+                    //since we're iterating over the filtered collection, why not use the effort in registeting the
+                    //individual beans too right?
+                    ConfigurationServiceDataProcessor p = dpp.get();
+                    String className = dpp.type().getName();
+                    appContext.getAutowireCapableBeanFactory().autowireBean(p);
+                    appContext.getAutowireCapableBeanFactory().initializeBean(p, className);
+                    return p;
+                })
                 .collect(Collectors.toList());
     }
-
 }

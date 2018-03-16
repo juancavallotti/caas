@@ -11,6 +11,14 @@ public class DefaultDocument implements Document {
 
     private String type;
 
+    public DefaultDocument() {
+    }
+
+    public DefaultDocument(String key, String type) {
+        this.key = key;
+        this.type = type;
+    }
+
     public String getKey() {
         return this.key;
     }
