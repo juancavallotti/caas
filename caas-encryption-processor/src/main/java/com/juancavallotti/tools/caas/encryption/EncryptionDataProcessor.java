@@ -45,7 +45,7 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
             doInitCiphers();
             initialized = true;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException ex) {
-            logger.error("Could not initialize encryption algorithm.");
+            logger.error("Could not initialize encryption algorithm.", ex);
         } catch (InvalidKeyException | InvalidKeySpecException ex) {
             logger.error("Invalid ecryption key", ex);
         }
@@ -142,9 +142,15 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
             }
         }
 
-        original.setProperties(replaced);
+        ConfigurationElement ret = new DefaultConfigurationElement();
+        ret.setProperties(replaced);
+        ret.setParents(original.getParents());
+        ret.setDocuments(original.getDocuments());
+        ret.setVersion(original.getVersion());
+        ret.setEnvironment(original.getEnvironment());
+        ret.setApplication(original.getApplication());
 
-        return original;
+        return ret;
     }
 
 }

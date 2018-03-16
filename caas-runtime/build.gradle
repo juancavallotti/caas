@@ -8,6 +8,9 @@ dependencies {
     compile project(':caas-backend-git')
     compile project(':caas-backend-mongo')
     compile project(':caas-backend-memory')
+
+    compile project(':caas-encryption-processor')
+
     compile project(':caas-ui')
 
     //logging
