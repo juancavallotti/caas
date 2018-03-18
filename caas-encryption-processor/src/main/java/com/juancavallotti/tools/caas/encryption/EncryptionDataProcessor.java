@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
@@ -57,28 +57,21 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
         //init both encryption and decryption ciphers
         encCipher = Cipher.getInstance(config.getAlgoritm());
         decCipher = Cipher.getInstance(config.getAlgoritm());
-        SecretKeySpec encryptionKey = retrieveKey();
-        IvParameterSpec initVector = buildInitVector();
+        Key encryptionKey = retrieveKey();
+        IvParameterSpec initVector = buildInitVector(encryptionKey);
 
         encCipher.init(Cipher.ENCRYPT_MODE, encryptionKey, initVector);
         decCipher.init(Cipher.DECRYPT_MODE, encryptionKey, initVector);
     }
 
-    private SecretKeySpec retrieveKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return new SecretKeySpec(getChars(config.getEncryptionKey()), "AES");
+    private Key retrieveKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return KeyBuilder.builder(config).buildKeySpec();
     }
 
-    private IvParameterSpec buildInitVector() throws NoSuchAlgorithmException {
-        return new IvParameterSpec(config.getEncryptionKey().getBytes());
+    private IvParameterSpec buildInitVector(Key keySpec) throws NoSuchAlgorithmException {
+        return new IvParameterSpec(keySpec.getEncoded());
     }
 
-    private byte[] getChars(String str) {
-        if (str == null) {
-            return new byte[0];
-        } else {
-            return str.getBytes();
-        }
-    }
 
     @Override
     public ConfigurationElement processWriteConfig(String operationName, ConfigurationElement original) {
