@@ -27,7 +27,10 @@ public class CaasResourceConfig extends ResourceConfig {
         //register all the extension service providers.
         ServiceLoader<ConfigurationServiceApiExtension> apiExtensions = ServiceLoader.load(ConfigurationServiceApiExtension.class);
 
-        logger.debug("Found {} API extension(s)", apiExtensions.stream().count());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Found {} API extension(s)", apiExtensions.stream().count());
+            apiExtensions.reload();
+        }
 
         apiExtensions.stream().forEach(ext -> {
             logger.debug("Registering API extension: {}", ext.type().getName());

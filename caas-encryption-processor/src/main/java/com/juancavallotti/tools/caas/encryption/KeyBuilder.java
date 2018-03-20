@@ -1,13 +1,18 @@
 package com.juancavallotti.tools.caas.encryption;
 
+import com.juancavallotti.tools.caas.encryption.api.WrappedKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.Key;
 import java.security.KeyStore;
+import java.util.Base64;
+import java.util.Optional;
 
 public class KeyBuilder {
 
@@ -31,35 +36,91 @@ public class KeyBuilder {
         }
     }
 
+    public WrappedKey wrapKey(String keyAlias, String keyPassword) {
+        try {
+            return doWrapKey(keyAlias, getChars(keyPassword));
+        } catch (SecurityException ex) {
+            logger.error("Error while wrapping key with alias {}", keyAlias, ex);
+            throw new RuntimeException(ex);
+        } catch (Exception ex) {
+            logger.error("Unknown Error while wrapping key with alias {}", keyAlias, ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private WrappedKey doWrapKey(String keyAlias, char[] keyPassword) throws Exception {
+
+        //retrieve the key to wrap.
+        Optional<Key> keyToWrap = doLoadFromKeyStore(keyAlias, keyPassword);
+
+        if (!keyToWrap.isPresent()) {
+            logger.error("Specified keyAlias {} not found in keystore", keyAlias);
+            return null;
+        }
+
+        //retrieve the wrapping key.
+        Optional<Key> wrappingKey = doLoadFromKeyStore(config.getWrapKeyAlias(), getChars(config.getWrapKeyPassword()));
+
+        if (!wrappingKey.isPresent()) {
+            logger.error("Wrapping key with alias {} not found on keystore", config.getWrapKeyAlias());
+            return null;
+        }
+
+        Optional<Key> macKey = doLoadFromKeyStore(config.getMacKeyAlias(), getChars(config.getMacKeyPassword()));
+
+        if (!macKey.isPresent()) {
+            logger.error("MAC key with alias {} not found on keystore", config.getMacKeyAlias());
+        }
+
+        //init the cipher.
+        Cipher cipher = Cipher.getInstance(EncryptionProperties.WRAPPING_KEY_ALG);
+        cipher.init(Cipher.WRAP_MODE, wrappingKey.get());
+
+        byte[] wrapped = cipher.wrap(keyToWrap.get());
+
+        //generate the mac signature.
+        Mac mac = Mac.getInstance(EncryptionProperties.MAC_KEY_ALG);
+        mac.init(macKey.get());
+
+        byte[] signature = mac.doFinal(wrapped);
+
+
+        //convert all to Base64 and return
+
+        String wrappedKeyStr = Base64.getEncoder().encodeToString(wrapped);
+        String signatureStr = Base64.getEncoder().encodeToString(signature);
+
+        return new WrappedKey(keyToWrap.get().getAlgorithm(), wrappedKeyStr, signatureStr);
+
+    }
+
     private Key specFromPassword() {
         return new SecretKeySpec(getBytes(config.getEncryptionKey()), "AES");
     }
 
     private Key specFromKeyStore() {
         try {
-            return doLoadFromKeyStore();
+            return doLoadFromKeyStore(config.getKeyAlias(), getChars(config.getKeyPassword()))
+                    .orElseThrow( () -> new RuntimeException("Could not find key " + config.getKeyAlias() + " in trustStore"));
         } catch (Exception ex) {
             logger.error("Could not Load key from keyStore", ex);
             throw new RuntimeException(ex);
         }
     }
 
-    private Key doLoadFromKeyStore() throws Exception {
+
+
+    private Optional<Key> doLoadFromKeyStore(String keyAlias, char[] keyPassword) throws Exception {
 
         InputStream is = loadFromClassPathOrFile(config.getKeystoreLocation());
         char[] keyStorePassword = getChars(config.getKeystorePassword());
-        char[] keyPassword = getChars(config.getKeyPassword());
 
         KeyStore ks = KeyStore.getInstance("JCEKS");
         ks.load(is, keyStorePassword);
 
-        Key key = ks.getKey(config.getKeyAlias(), keyPassword);
+        Key key = ks.getKey(keyAlias, keyPassword);
 
-        if (key == null) {
-            throw new RuntimeException("Encryption key not found in keystore, verify key alias...");
-        }
-
-        return key;
+        return Optional.ofNullable(key);
     }
 
     private byte[] getBytes(String str) {
