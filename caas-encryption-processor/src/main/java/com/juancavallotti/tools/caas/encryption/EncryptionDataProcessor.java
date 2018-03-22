@@ -9,10 +9,8 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
@@ -62,21 +60,8 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
     private void doInitCiphers() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 
         //init both encryption and decryption ciphers
-        encCipher = Cipher.getInstance(config.getAlgoritm());
-        decCipher = Cipher.getInstance(config.getAlgoritm());
-        Key encryptionKey = retrieveKey();
-        IvParameterSpec initVector = buildInitVector(encryptionKey);
-
-        encCipher.init(Cipher.ENCRYPT_MODE, encryptionKey, initVector);
-        decCipher.init(Cipher.DECRYPT_MODE, encryptionKey, initVector);
-    }
-
-    private Key retrieveKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return KeyBuilder.builder(config).buildKeySpec();
-    }
-
-    private IvParameterSpec buildInitVector(Key keySpec) throws NoSuchAlgorithmException {
-        return new IvParameterSpec(keySpec.getEncoded());
+        encCipher = CipherBuilder.builder(config).buildForEncryption();
+        decCipher = CipherBuilder.builder(config).buildForDecryption();
     }
 
 

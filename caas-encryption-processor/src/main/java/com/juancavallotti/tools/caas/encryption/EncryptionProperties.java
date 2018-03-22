@@ -8,7 +8,9 @@ public class EncryptionProperties {
     public static final String MAC_KEY_ALG = "HmacSHA256";
     public static final String WRAPPING_KEY_ALG = "Blowfish";
 
-    private String algoritm;
+    private String algorithm;
+    private String mode = "CBC";
+    private String padding = "PKCS5PADDING";
     private String encryptionKey;
     private String keyPassword;
     private String keystoreLocation;
@@ -26,13 +28,28 @@ public class EncryptionProperties {
     private String wrapKeyPassword;
 
 
-
-    public String getAlgoritm() {
-        return algoritm;
+    public String getAlgorithm() {
+        return algorithm;
     }
 
-    public void setAlgoritm(String algoritm) {
-        this.algoritm = algoritm;
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    public String getPadding() {
+        return padding;
+    }
+
+    public void setPadding(String padding) {
+        this.padding = padding;
     }
 
     public String getEncryptionKey() {

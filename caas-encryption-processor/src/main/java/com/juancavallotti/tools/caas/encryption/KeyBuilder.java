@@ -90,12 +90,12 @@ public class KeyBuilder {
         String wrappedKeyStr = Base64.getEncoder().encodeToString(wrapped);
         String signatureStr = Base64.getEncoder().encodeToString(signature);
 
-        return new WrappedKey(keyToWrap.get().getAlgorithm(), wrappedKeyStr, signatureStr, config.getAlgoritm());
+        return new WrappedKey(keyToWrap.get().getAlgorithm(), wrappedKeyStr, signatureStr, config.getAlgorithm());
 
     }
 
     private Key specFromPassword() {
-        return new SecretKeySpec(getBytes(config.getEncryptionKey()), "AES");
+        return new SecretKeySpec(getBytes(config.getEncryptionKey()), getKeyAlgorithm(config.getAlgorithm()));
     }
 
     private Key specFromKeyStore() {
@@ -156,5 +156,18 @@ public class KeyBuilder {
 
         logger.error("Resource {} not found in classpath or filesystem!!", fileName);
         throw new FileNotFoundException(fileName);
+    }
+
+    private String getKeyAlgorithm(String algString) {
+
+        if (StringUtils.isEmpty(algString)) {
+            return null;
+        }
+
+        if (algString.contains("/")) {
+            return algString.split("/")[0];
+        }
+
+        return algString;
     }
 }
