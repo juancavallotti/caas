@@ -90,7 +90,7 @@ public class KeyBuilder {
         String wrappedKeyStr = Base64.getEncoder().encodeToString(wrapped);
         String signatureStr = Base64.getEncoder().encodeToString(signature);
 
-        return new WrappedKey(keyToWrap.get().getAlgorithm(), wrappedKeyStr, signatureStr);
+        return new WrappedKey(keyToWrap.get().getAlgorithm(), wrappedKeyStr, signatureStr, config.getAlgoritm());
 
     }
 

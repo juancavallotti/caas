@@ -5,14 +5,16 @@ public class WrappedKey {
     private String algorithm;
     private String encodedKey;
     private String macSignature;
+    private String cipherAlgorithm;
 
     public WrappedKey() {
     }
 
-    public WrappedKey(String algorithm, String encodedKey, String macSignature) {
+    public WrappedKey(String algorithm, String encodedKey, String macSignature, String cipherAlgorithm) {
         this.algorithm = algorithm;
         this.encodedKey = encodedKey;
         this.macSignature = macSignature;
+        this.cipherAlgorithm = cipherAlgorithm;
     }
 
     public String getAlgorithm() {
@@ -37,5 +39,13 @@ public class WrappedKey {
 
     public void setMacSignature(String macSignature) {
         this.macSignature = macSignature;
+    }
+
+    public String getCipherAlgorithm() {
+        return cipherAlgorithm;
+    }
+
+    public void setCipherAlgorithm(String cipherAlgoritm) {
+        this.cipherAlgorithm = cipherAlgoritm;
     }
 }
