@@ -5,13 +5,12 @@ import com.juancavallotti.tools.caas.spi.ConfigurationServiceDataProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
@@ -42,6 +41,12 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
 
         try {
             initialized = false;
+
+            if (config.isClientDecryptionEnabled()) {
+                logger.info("Client decryption setting is enabled, API will not process encryption / decryption.");
+                return;
+            }
+
             doInitCiphers();
             initialized = true;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException ex) {
@@ -55,21 +60,8 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
     private void doInitCiphers() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 
         //init both encryption and decryption ciphers
-        encCipher = Cipher.getInstance(config.getAlgoritm());
-        decCipher = Cipher.getInstance(config.getAlgoritm());
-        Key encryptionKey = retrieveKey();
-        IvParameterSpec initVector = buildInitVector(encryptionKey);
-
-        encCipher.init(Cipher.ENCRYPT_MODE, encryptionKey, initVector);
-        decCipher.init(Cipher.DECRYPT_MODE, encryptionKey, initVector);
-    }
-
-    private Key retrieveKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return KeyBuilder.builder(config).buildKeySpec();
-    }
-
-    private IvParameterSpec buildInitVector(Key keySpec) throws NoSuchAlgorithmException {
-        return new IvParameterSpec(keySpec.getEncoded());
+        encCipher = CipherBuilder.builder(config).buildForEncryption();
+        decCipher = CipherBuilder.builder(config).buildForDecryption();
     }
 
 
@@ -77,10 +69,10 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
     public ConfigurationElement processWriteConfig(String operationName, ConfigurationElement original) {
         return doComputePropertyReplacement(original, v -> {
             try {
-                return Base64.getEncoder().encodeToString(encCipher.doFinal(v.getValue().getBytes()));
+                return Base64.getEncoder().encodeToString(encCipher.doFinal(v.getBytes()));
             } catch (IllegalBlockSizeException | BadPaddingException ex) {
-                logger.error("Could not encrypt property, keeping original value...", v.getKey(), ex);
-                return v.getValue();
+                logger.error("Could not process encryption", ex);
+                return v;
             }
         });
     }
@@ -89,10 +81,10 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
     public ConfigurationElement processReadConfig(String operationName, ConfigurationElement original) {
         return doComputePropertyReplacement(original, v -> {
             try {
-                return new String(decCipher.doFinal(Base64.getDecoder().decode(v.getValue())));
+                return new String(decCipher.doFinal(Base64.getDecoder().decode(v)));
             } catch (IllegalBlockSizeException | BadPaddingException ex) {
-                logger.error("Could not decrypt property, keeping original value...", v.getKey(), ex);
-                return v.getValue();
+                logger.error("Could not process decryption", ex);
+                return v;
             }
         });
     }
@@ -116,7 +108,12 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
     }
 
 
-    private ConfigurationElement doComputePropertyReplacement(ConfigurationElement original, Function<Map.Entry<String, String>, String> replacementFunction) {
+    private ConfigurationElement doComputePropertyReplacement(ConfigurationElement original, Function<String, String> replacementFunction) {
+
+        if (config.isClientDecryptionEnabled()) {
+            return original;
+        }
+
         if (!initialized) {
             logger.warn("Bypassing encryption as it has invalid configuration!");
             return original;
@@ -127,8 +124,19 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
 
         for(Map.Entry<String, String> prop :  original.getProperties().entrySet()) {
             try {
-                String str = replacementFunction.apply(prop);
-                replaced.put(prop.getKey(), str);
+                String str = replacementFunction.apply(prop.getValue());
+
+                String key = replacementFunction.apply(prop.getKey());
+
+                if (StringUtils.hasText(key) && str.equals(prop.getKey())) {
+                    logger.error("Could not encrypt/decrypt property {}, keeping original value...", key);
+                }
+
+                if (StringUtils.hasText(str) && str.equals(prop.getValue())) {
+                    logger.error("Could not encrypt/decrypt property {}, keeping original value...", key);
+                }
+
+                replaced.put(key, str);
             } catch (Exception ex) {
                 logger.error("Could not encrypt property: {} keeping original value...", prop.getKey(), ex);
                 replaced.put(prop.getKey(), prop.getValue());

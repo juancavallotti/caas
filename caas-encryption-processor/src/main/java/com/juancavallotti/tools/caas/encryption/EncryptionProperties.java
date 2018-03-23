@@ -5,19 +5,51 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "encryption")
 public class EncryptionProperties {
 
-    private String algoritm;
+    public static final String MAC_KEY_ALG = "HmacSHA256";
+    public static final String WRAPPING_KEY_ALG = "Blowfish";
+
+    private String algorithm;
+    private String mode = "CBC";
+    private String padding = "PKCS5PADDING";
     private String encryptionKey;
     private String keyPassword;
     private String keystoreLocation;
     private String keystorePassword;
     private String keyAlias;
 
-    public String getAlgoritm() {
-        return algoritm;
+    //extension API
+    private boolean extensionApiEnabled = true;
+
+    private boolean clientDecryptionEnabled = false;
+
+    private String macKeyAlias;
+    private String macKeyPassword;
+    private String wrapKeyAlias;
+    private String wrapKeyPassword;
+
+
+    public String getAlgorithm() {
+        return algorithm;
     }
 
-    public void setAlgoritm(String algoritm) {
-        this.algoritm = algoritm;
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    public String getPadding() {
+        return padding;
+    }
+
+    public void setPadding(String padding) {
+        this.padding = padding;
     }
 
     public String getEncryptionKey() {
@@ -58,5 +90,53 @@ public class EncryptionProperties {
 
     public void setKeyPassword(String keyPassword) {
         this.keyPassword = keyPassword;
+    }
+
+    public boolean isExtensionApiEnabled() {
+        return extensionApiEnabled;
+    }
+
+    public void setExtensionApiEnabled(boolean extensionApiEnabled) {
+        this.extensionApiEnabled = extensionApiEnabled;
+    }
+
+    public String getMacKeyAlias() {
+        return macKeyAlias;
+    }
+
+    public void setMacKeyAlias(String macKeyAlias) {
+        this.macKeyAlias = macKeyAlias;
+    }
+
+    public String getMacKeyPassword() {
+        return macKeyPassword;
+    }
+
+    public void setMacKeyPassword(String macKeyPassword) {
+        this.macKeyPassword = macKeyPassword;
+    }
+
+    public String getWrapKeyAlias() {
+        return wrapKeyAlias;
+    }
+
+    public void setWrapKeyAlias(String wrapKeyAlias) {
+        this.wrapKeyAlias = wrapKeyAlias;
+    }
+
+    public String getWrapKeyPassword() {
+        return wrapKeyPassword;
+    }
+
+    public void setWrapKeyPassword(String wrapKeyPassword) {
+        this.wrapKeyPassword = wrapKeyPassword;
+    }
+
+    public boolean isClientDecryptionEnabled() {
+        return clientDecryptionEnabled;
+    }
+
+    public void setClientDecryptionEnabled(boolean clientDecryptionEnabled) {
+        this.clientDecryptionEnabled = clientDecryptionEnabled;
     }
 }

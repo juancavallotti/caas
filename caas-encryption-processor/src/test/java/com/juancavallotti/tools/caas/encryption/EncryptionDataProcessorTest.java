@@ -19,8 +19,8 @@ public class EncryptionDataProcessorTest {
         String unencrypted = "hello secret world!";
         String key = "my.value";
         EncryptionProperties config = new EncryptionProperties();
-        config.setAlgoritm("AES/CBC/PKCS5PADDING");
-        config.setEncryptionKey("awesomepassword!");
+        config.setAlgorithm("AES/CBC/PKCS5PADDING");
+        config.setEncryptionKey("awesomepassword!awesome!");
 
 
 
@@ -58,7 +58,7 @@ public class EncryptionDataProcessorTest {
         String key = "my.value";
 
         EncryptionProperties config = new EncryptionProperties();
-        config.setAlgoritm("AES/CBC/PKCS5PADDING");
+        config.setAlgorithm("AES/CBC/PKCS5PADDING");
         config.setKeystoreLocation("testKeystore.jcks");
         config.setKeyAlias("enc-key");
         config.setKeystorePassword("changeit");

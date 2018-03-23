@@ -10,8 +10,7 @@
         <AsyncLogger name="org.apache" level="warn" />
         <AsyncLogger name="org.hibernate" level="warn" />
 
-        <AsyncLogger name="com.juancavallotti.tools.caas.impl" level="debug" />
-        <AsyncLogger name="com.juancavallotti.tools.caas.git" level="debug" />
+        <AsyncLogger name="com.juancavallotti.tools.caas" level="debug" />
 
         <AsyncRoot level="info">
             <AppenderRef ref="Console"/>
