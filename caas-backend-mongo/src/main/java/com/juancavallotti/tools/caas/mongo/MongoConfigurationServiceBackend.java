@@ -7,6 +7,7 @@ import com.juancavallotti.tools.caas.api.DocumentData;
 import com.juancavallotti.tools.caas.mongo.model.*;
 import com.juancavallotti.tools.caas.mongo.repository.ConfigurationRepository;
 import com.juancavallotti.tools.caas.mongo.repository.DocumentDataRepository;
+import com.juancavallotti.tools.caas.spi.ConfigurationServiceApiExtension;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.apache.commons.io.IOUtils;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -166,6 +168,45 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
         return elm;
     }
 
+
+    @Override
+    public ConfigurationElement replaceConfiguration(ConfigurationElement entity) throws ConfigurationServiceBackendException {
+
+        if (entity.getDocuments() != null && !entity.getDocuments().isEmpty()) {
+
+            throwWithMessageAndCause("Updated configuration cannot have documents",
+                    ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
+        }
+
+        MongoConfigurationElement existingConfig = lookFor(entity)
+                .orElseThrow(this::configNotFoundException);
+
+
+        //check the parents exist
+        if (entity.getParents() != null) {
+            for (ConfigCoordinate parent : entity.getParents()) {
+                if (findWithCoordinate(parent) == null)
+                    throwWithMessageAndCause("Parent not found",
+                            ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
+            }
+        }
+
+        List<ConfigCoordinate> parents = entity.getParents();
+
+        if (parents == null) {
+            parents = Collections.emptyList();
+        }
+
+        //replace all the parents.
+        existingConfig.setParents(parents);
+
+        //replace all properties
+        existingConfig.setProperties(MongoConfigProperties.fromMap(entity.getProperties()));
+
+        repository.save(existingConfig);
+
+        return existingConfig;
+    }
 
     @Override
     public ConfigurationElement patchConfiguration(ConfigurationElement entity) throws ConfigurationServiceBackendException {
