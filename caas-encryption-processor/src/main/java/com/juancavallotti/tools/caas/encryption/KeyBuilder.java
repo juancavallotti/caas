@@ -86,11 +86,14 @@ public class KeyBuilder {
 
 
         //convert all to Base64 and return
+        Cipher dec = CipherBuilder.builder(config).buildForDecryption();
 
+        String algorithmInfoEnc = Base64.getEncoder().encodeToString(dec.getAlgorithm().getBytes());
         String wrappedKeyStr = Base64.getEncoder().encodeToString(wrapped);
         String signatureStr = Base64.getEncoder().encodeToString(signature);
+        String algParamsEncoded = Base64.getEncoder().encodeToString(dec.getParameters().getEncoded());
 
-        return new WrappedKey(keyToWrap.get().getAlgorithm(), wrappedKeyStr, signatureStr, config.getAlgorithm());
+        return new WrappedKey(algorithmInfoEnc, wrappedKeyStr, signatureStr, algParamsEncoded);
 
     }
 

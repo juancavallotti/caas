@@ -5,16 +5,25 @@ public class WrappedKey {
     private String algorithm;
     private String encodedKey;
     private String macSignature;
-    private String cipherAlgorithm;
+    private String parameters;
 
     public WrappedKey() {
     }
 
-    public WrappedKey(String algorithm, String encodedKey, String macSignature, String cipherAlgorithm) {
+    /**
+     * Build wrapped key along with information that is useful for the client to decrypt the data provided by this
+     * service.
+     *
+     * @param algorithm the name of the algoritm of the key.
+     * @param encodedKey the wrapped key encoded in base 64.
+     * @param macSignature the signature of the key.
+     * @param algParameters the algorithm parameters.
+     */
+    public WrappedKey(String algorithm, String encodedKey, String macSignature, String algParameters) {
         this.algorithm = algorithm;
         this.encodedKey = encodedKey;
         this.macSignature = macSignature;
-        this.cipherAlgorithm = cipherAlgorithm;
+        this.parameters = algParameters;
     }
 
     public String getAlgorithm() {
@@ -41,11 +50,11 @@ public class WrappedKey {
         this.macSignature = macSignature;
     }
 
-    public String getCipherAlgorithm() {
-        return cipherAlgorithm;
+    public String getParameters() {
+        return parameters;
     }
 
-    public void setCipherAlgorithm(String cipherAlgoritm) {
-        this.cipherAlgorithm = cipherAlgoritm;
+    public void setParameters(String parameters) {
+        this.parameters = parameters;
     }
 }
