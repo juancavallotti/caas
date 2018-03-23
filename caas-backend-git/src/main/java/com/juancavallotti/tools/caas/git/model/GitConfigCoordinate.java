@@ -115,7 +115,7 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
         environmentSettings.getImports().forEach(p -> {
 
             //this way we're sure that we're avoiding the user to repeat obvious information.
-            String app = Optional.ofNullable(p.getApplication()).orElseThrow(() -> new IllegalArgumentException("Missing parent name! Please check settings."));
+            String app = Optional.ofNullable(p.getApplication()).orElseThrow(() -> new IllegalArgumentException("Missing import name! Please check settings."));
             String ver = Optional.ofNullable(p.getVersion()).orElse(getVersion());
             String env = Optional.ofNullable(p.getEnvironment()).orElse(getEnvironment());
 
@@ -132,7 +132,7 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
                     imports.add(found);
                 }
             } else {
-                logger.warn("Parent in configuration [app: {}, ver: {}, env: {}] does not exist in repository!!", app, ver, env);
+                logger.warn("Import in configuration [app: {}, ver: {}, env: {}] does not exist in repository!!", app, ver, env);
             }
         });
 
