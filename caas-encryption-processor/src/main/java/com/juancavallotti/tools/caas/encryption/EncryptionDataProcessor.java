@@ -101,6 +101,16 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
     }
 
     private DocumentData processStreams(DocumentData original, Cipher cipher) {
+
+        if (config.isClientDecryptionEnabled()) {
+            return original;
+        }
+
+        if (!initialized) {
+            logger.warn("Bypassing encryption as it has invalid configuration!");
+            return original;
+        }
+
         DefaultDocumentData ret = new DefaultDocumentData();
         ret.setDocument(original.getDocument());
         ret.setData(new CipherInputStream(original.getData(), cipher));
