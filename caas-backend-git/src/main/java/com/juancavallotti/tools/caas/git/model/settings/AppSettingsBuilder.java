@@ -90,8 +90,8 @@ public class AppSettingsBuilder {
             settings.setPropertiesFileTemplate(ModelConventions.defaultPropertiesFileTemplate);
         }
 
-        if (settings.getParents() == null) {
-            settings.setParents(Collections.emptyList());
+        if (settings.getImports() == null) {
+            settings.setImports(Collections.emptyList());
         }
 
         if (settings.getEnvironments() == null) {

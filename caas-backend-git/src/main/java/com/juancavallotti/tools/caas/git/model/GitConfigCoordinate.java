@@ -42,7 +42,7 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
         ret.setVersion(getVersion());
         ret.setEnvironment(getEnvironment());
 
-        buildParents(ret, globals, repo);
+        buildImports(ret, globals, repo);
 
         //read the documents.
         File[] docs = documentsFolder.listFiles();
@@ -95,24 +95,24 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
         });
     }
 
-    private void buildParents(ConfigurationElement element, List<GitConfigCoordinate> globals, List<GitConfigCoordinate> repo) {
+    private void buildImports(ConfigurationElement element, List<GitConfigCoordinate> globals, List<GitConfigCoordinate> repo) {
 
         //simply remove all apps that have the same name, so we dont have strange combinations.
         //we only want globals that are the same version and environment too, so the rule is
         //different name AND same version AND same environment
-        List<ConfigCoordinate> globalParents = globals.stream()
+        List<ConfigCoordinate> globalImports = globals.stream()
                 .filter(p -> !getApplication().equals(p.getApplication())
                         && getEnvironment().equals(p.getEnvironment())
                         && getVersion().equals(p.getVersion()))
                 .collect(Collectors.toList());
 
         //we add all the effective globals.
-        final List<ConfigCoordinate> parents = new LinkedList<>(globalParents);
+        final List<ConfigCoordinate> imports = new LinkedList<>(globalImports);
 
 
 
         //we read the configuration.
-        environmentSettings.getParents().forEach(p -> {
+        environmentSettings.getImports().forEach(p -> {
 
             //this way we're sure that we're avoiding the user to repeat obvious information.
             String app = Optional.ofNullable(p.getApplication()).orElseThrow(() -> new IllegalArgumentException("Missing parent name! Please check settings."));
@@ -128,22 +128,22 @@ public class GitConfigCoordinate extends DefaultConfigCoordinate {
             }).findAny().orElse(null);
 
             if (found != null) {
-                if (!parents.contains(found)) {
-                    parents.add(found);
+                if (!imports.contains(found)) {
+                    imports.add(found);
                 }
             } else {
                 logger.warn("Parent in configuration [app: {}, ver: {}, env: {}] does not exist in repository!!", app, ver, env);
             }
         });
 
-        //if I am in the global and one of my parents is global too, then I need to warn about possible circular dependency!!
+        //if I am in the global and one of my imports is global too, then I need to warn about possible circular dependency!!
         if (globals.contains(element)) {
-            parents.forEach(p -> {
-                if (globals.contains(p)) logger.warn("Possible circular dependency found!! {} and {} are mutual parents!", p.print(), element.print());
+            imports.forEach(p -> {
+                if (globals.contains(p)) logger.warn("Possible circular dependency found!! {} and {} are mutual imports!", p.print(), element.print());
             });
         }
 
-        element.setParents(parents);
+        element.setImports(imports);
     }
 
     private Properties readProperties() {

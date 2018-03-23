@@ -15,7 +15,7 @@ public class DefaultConfigurationElement implements ConfigurationElement {
 
     private String environment;
 
-    private List<ConfigCoordinate> parents;
+    private List<ConfigCoordinate> imports;
 
     private ConfigurationElement.PropertiesType properties;
 
@@ -45,12 +45,14 @@ public class DefaultConfigurationElement implements ConfigurationElement {
         this.environment = environment;
     }
 
-    public List<ConfigCoordinate> getParents() {
-        return this.parents;
+    @Override
+    public List<ConfigCoordinate> getImports() {
+        return imports;
     }
 
-    public void setParents(List<ConfigCoordinate> parents) {
-        this.parents = parents;
+    @Override
+    public void setImports(List<ConfigCoordinate> imports) {
+        this.imports = imports;
     }
 
     public ConfigurationElement.PropertiesType getProperties() {

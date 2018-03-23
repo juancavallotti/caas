@@ -1,13 +1,9 @@
 package com.juancavallotti.tools.caas.encryption;
 
 import com.juancavallotti.tools.caas.api.*;
-import org.apache.logging.log4j.core.util.IOUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 

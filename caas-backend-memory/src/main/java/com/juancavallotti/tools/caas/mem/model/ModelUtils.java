@@ -81,8 +81,8 @@ public class ModelUtils {
             target.getProperties().putAll(source.getProperties());
         }
 
-        if (source.getParents() != null) {
-            target.setParents(new LinkedList<>(source.getParents()));
+        if (source.getImports() != null) {
+            target.setImports(new LinkedList<>(source.getImports()));
         }
 
         if (source.getDocuments() != null) {

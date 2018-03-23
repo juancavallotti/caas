@@ -7,8 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Document(collection = "configurations")
 public class MongoConfigurationElement extends MongoConfigCoordinate implements ConfigurationElement {
@@ -17,20 +15,20 @@ public class MongoConfigurationElement extends MongoConfigCoordinate implements 
     @JsonIgnore //not the best but we embrace jackson... for now
     private String id;
 
-    private List<ConfigCoordinate> parents;
+    private List<ConfigCoordinate> imports;
 
     private List<com.juancavallotti.tools.caas.api.Document> documents;
 
     private MongoConfigProperties properties;
 
     @Override
-    public List<ConfigCoordinate> getParents() {
-        return parents;
+    public List<ConfigCoordinate> getImports() {
+        return imports;
     }
 
     @Override
-    public void setParents(List<ConfigCoordinate> parents) {
-        this.parents = parents;
+    public void setImports(List<ConfigCoordinate> imports) {
+        this.imports = imports;
     }
 
     @Override
@@ -78,8 +76,8 @@ public class MongoConfigurationElement extends MongoConfigCoordinate implements 
         }
 
 
-        if (original.getParents() != null) {
-            ret.setParents(toMongoCoordinates(original.getParents()));
+        if (original.getImports() != null) {
+            ret.setImports(toMongoCoordinates(original.getImports()));
         }
 
         ret.setProperties(MongoConfigProperties.fromMap(original.getProperties()));

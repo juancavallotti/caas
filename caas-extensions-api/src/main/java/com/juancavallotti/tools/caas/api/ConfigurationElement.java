@@ -23,9 +23,9 @@ public interface ConfigurationElement extends ConfigCoordinate {
 
     void setEnvironment(String environment);
 
-    List<ConfigCoordinate> getParents();
+    List<ConfigCoordinate> getImports();
 
-    void setParents(List<ConfigCoordinate> parents);
+    void setImports(List<ConfigCoordinate> imports);
 
     PropertiesType getProperties();
 

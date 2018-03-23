@@ -7,7 +7,6 @@ import com.juancavallotti.tools.caas.api.DocumentData;
 import com.juancavallotti.tools.caas.mongo.model.*;
 import com.juancavallotti.tools.caas.mongo.repository.ConfigurationRepository;
 import com.juancavallotti.tools.caas.mongo.repository.DocumentDataRepository;
-import com.juancavallotti.tools.caas.spi.ConfigurationServiceApiExtension;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackend;
 import com.juancavallotti.tools.caas.spi.ConfigurationServiceBackendException;
 import org.apache.commons.io.IOUtils;
@@ -67,11 +66,11 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
                     ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
         }
 
-        //check the parents exist
-        if (element.getParents() != null) {
-            for (ConfigCoordinate parent : element.getParents()) {
-                if (findWithCoordinate(parent) == null)
-                    throwWithMessageAndCause("Parent not found",
+        //check the imports exist
+        if (element.getDocuments() != null) {
+            for (ConfigCoordinate importedApp : element.getImports()) {
+                if (findWithCoordinate(importedApp) == null)
+                    throwWithMessageAndCause("Import not found",
                             ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
             }
         }
@@ -182,23 +181,23 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
                 .orElseThrow(this::configNotFoundException);
 
 
-        //check the parents exist
-        if (entity.getParents() != null) {
-            for (ConfigCoordinate parent : entity.getParents()) {
-                if (findWithCoordinate(parent) == null)
-                    throwWithMessageAndCause("Parent not found",
+        //check the imports exist
+        if (entity.getImports() != null) {
+            for (ConfigCoordinate importedApp : entity.getImports()) {
+                if (findWithCoordinate(importedApp) == null)
+                    throwWithMessageAndCause("Import not found",
                             ConfigurationServiceBackendException.ExceptionCause.VALIDATION);
             }
         }
 
-        List<ConfigCoordinate> parents = entity.getParents();
+        List<ConfigCoordinate> imports = entity.getImports();
 
-        if (parents == null) {
-            parents = Collections.emptyList();
+        if (imports == null) {
+            imports = Collections.emptyList();
         }
 
-        //replace all the parents.
-        existingConfig.setParents(parents);
+        //replace all the imports.
+        existingConfig.setImports(imports);
 
         //replace all properties
         existingConfig.setProperties(MongoConfigProperties.fromMap(entity.getProperties()));
@@ -232,15 +231,15 @@ public class MongoConfigurationServiceBackend implements ConfigurationServiceBac
 
         }
 
-        //merge the parents.
-        //this is easy as we can simply replace the parents if they exist.
-        if (entity.getParents() != null) {
-            for (ConfigCoordinate coordinate : entity.getParents()) {
+        //merge the imports.
+        //this is easy as we can simply replace the imports if they exist.
+        if (entity.getImports() != null) {
+            for (ConfigCoordinate coordinate : entity.getImports()) {
                 lookFor(coordinate).orElseThrow(() -> configNotFoundException(coordinate));
             }
 
-            //replace the parents.
-            existingConfig.setParents(MongoConfigCoordinate.toMongoCoordinates(entity.getParents()));
+            //replace the imports.
+            existingConfig.setImports(MongoConfigCoordinate.toMongoCoordinates(entity.getImports()));
         }
 
         //if everything is right, we update in the backed.

@@ -41,10 +41,10 @@ public class MemoryConfigurationServiceBackend implements ConfigurationServiceBa
 
         //we need to validate
 
-        if (element.getParents() != null) {
-            for(ConfigCoordinate parent : element.getParents()) {
-                if (!repository.contains(parent)) {
-                    throw configNotFound(parent);
+        if (element.getImports() != null) {
+            for(ConfigCoordinate importConfig : element.getImports()) {
+                if (!repository.contains(importConfig)) {
+                    throw configNotFound(importConfig);
                 }
             }
         }
@@ -157,18 +157,18 @@ public class MemoryConfigurationServiceBackend implements ConfigurationServiceBa
         existing.getProperties().putAll(entity.getProperties());
 
         //we're done
-        if (entity.getParents() == null) {
+        if (entity.getImports() == null) {
             return existing;
         }
 
-        if (existing.getParents() == null) {
+        if (existing.getImports() == null) {
             //init the list if not there.
-            existing.setParents(new LinkedList<>());
+            existing.setImports(new LinkedList<>());
         }
 
-        for (ConfigCoordinate parent : entity.getParents()) {
-            if (!existing.getParents().contains(parent)) {
-                existing.getParents().add(ModelUtils.toCoordinate(parent));
+        for (ConfigCoordinate importApp : entity.getImports()) {
+            if (!existing.getImports().contains(importApp)) {
+                existing.getImports().add(ModelUtils.toCoordinate(importApp));
             }
         }
 

@@ -74,12 +74,12 @@
                         </div>
 
 
-                        <!-- the parents panel -->
-                        <div class="col-lg-3 caas-sidebar-right" v-if="appConfig != null && appConfig.parents.length > 0">
-                            <h6>Parents: </h6>
+                        <!-- the imports panel -->
+                        <div class="col-lg-3 caas-sidebar-right" v-if="appConfig != null && appConfig.imports.length > 0">
+                            <h6>Imports: </h6>
                             <div class="caas-coordinates-container">
                                 <dl class="row">
-                                    <template v-for="app in appConfig.parents">
+                                    <template v-for="app in appConfig.imports">
                                         <dd class="col-sm-3 caas-actionable" v-on:click="load(app)">{{app.application}}</dd>
                                         <dt class="col-sm-9">
                                             <p>V: {{app.version}}</p>

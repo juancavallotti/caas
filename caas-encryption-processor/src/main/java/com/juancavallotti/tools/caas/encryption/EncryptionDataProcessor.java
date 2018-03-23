@@ -145,7 +145,7 @@ public class EncryptionDataProcessor implements ConfigurationServiceDataProcesso
 
         ConfigurationElement ret = new DefaultConfigurationElement();
         ret.setProperties(replaced);
-        ret.setParents(original.getParents());
+        ret.setImports(original.getImports());
         ret.setDocuments(original.getDocuments());
         ret.setVersion(original.getVersion());
         ret.setEnvironment(original.getEnvironment());

@@ -3,13 +3,12 @@ package com.juancavallotti.tools.caas.git.model.settings;
 import com.juancavallotti.tools.caas.api.DefaultConfigCoordinate;
 
 import java.util.List;
-import java.util.Objects;
 
 public class EnvironmentSettings {
 
     private String documentsPath;
 
-    private List<DefaultConfigCoordinate> parents;
+    private List<DefaultConfigCoordinate> imports;
 
     public String getDocumentsPath() {
         return documentsPath;
@@ -19,11 +18,11 @@ public class EnvironmentSettings {
         this.documentsPath = documentsPath;
     }
 
-    public List<DefaultConfigCoordinate> getParents() {
-        return parents;
+    public List<DefaultConfigCoordinate> getImports() {
+        return imports;
     }
 
-    public void setParents(List<DefaultConfigCoordinate> parents) {
-        this.parents = parents;
+    public void setImports(List<DefaultConfigCoordinate> imports) {
+        this.imports = imports;
     }
 }

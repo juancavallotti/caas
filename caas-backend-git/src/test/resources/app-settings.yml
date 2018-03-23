@@ -3,14 +3,14 @@ global: true #specifies whether this app is global or not.
 environments:
   dev:
     documentsPath: devDocs
-    parents:
+    imports:
       # forEnvironment is optional
       - application: parent
         version: v1
         environment: dev
   #rest of the environments have standard conventional settings.
-  #but we can have a global parents setting
-parents:
+  #but we can have a global imports setting
+imports:
   - application: globals
     version: v1
   #and we leave empty the forEnvironment to match the forEnvironment, if present.

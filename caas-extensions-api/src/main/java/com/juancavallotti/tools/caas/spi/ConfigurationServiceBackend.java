@@ -91,7 +91,7 @@ public interface ConfigurationServiceBackend {
      * there is the option to ignore them or to throw invalid data exception.
      *
      * This method just creates new properties, or updates existing ones,
-     * also updates the parents, if provided.
+     * also updates the imports, if provided.
      *
      * This is an optional operation.
      * @param entity the configuration to update.

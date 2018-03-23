@@ -1,8 +1,6 @@
 package com.juancavallotti.tools.caas.git.model.settings;
 
-import com.juancavallotti.tools.caas.api.ConfigCoordinate;
 import com.juancavallotti.tools.caas.api.DefaultConfigCoordinate;
-import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +10,7 @@ import java.util.Optional;
 public class AppSettings {
     private String docsPrefix;
     private Map<String, EnvironmentSettings> environments;
-    private List<DefaultConfigCoordinate> parents;
+    private List<DefaultConfigCoordinate> imports;
     private String propertiesFileTemplate;
     private Boolean global;
 
@@ -32,12 +30,12 @@ public class AppSettings {
         this.environments = environments;
     }
 
-    public List<DefaultConfigCoordinate> getParents() {
-        return parents;
+    public List<DefaultConfigCoordinate> getImports() {
+        return imports;
     }
 
-    public void setParents(List<DefaultConfigCoordinate> parents) {
-        this.parents = parents;
+    public void setImports(List<DefaultConfigCoordinate> imports) {
+        this.imports = imports;
     }
 
     public String getPropertiesFileTemplate() {
@@ -74,7 +72,7 @@ public class AppSettings {
 
         EnvironmentSettings ret = new EnvironmentSettings();
 
-        ret.setParents(Collections.unmodifiableList(getParents()));
+        ret.setImports(Collections.unmodifiableList(getImports()));
         ret.setDocumentsPath(getDocsPrefix() + name);
 
         return ret;
