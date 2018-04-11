@@ -20,9 +20,9 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.filter.CorsFilter;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
@@ -89,6 +89,22 @@ public class SpringBeansConfig implements ApplicationListener<EmbeddedServletCon
         logger.debug("Registering CORS filter: {}", source);
 
         FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+        bean.setOrder(0);
+
+        return bean;
+    }
+
+    @Bean
+    public FilterRegistrationBean configureRequestLoggingFilter() {
+
+        CommonsRequestLoggingFilter ret = new CommonsRequestLoggingFilter();
+
+        ret.setIncludeClientInfo(true);
+        ret.setIncludeHeaders(true);
+        ret.setIncludePayload(true);
+        ret.setIncludeQueryString(true);
+
+        FilterRegistrationBean bean = new FilterRegistrationBean(ret);
         bean.setOrder(0);
 
         return bean;
