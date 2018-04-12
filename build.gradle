@@ -50,10 +50,10 @@ subprojects {
         compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2'
 
         //all modules depend on junit
-        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
-        testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
-        testRuntime group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: logj4version
-        testRuntime group: 'com.lmax', name: 'disruptor', version: '3.3.7'
+        testCompileOnly group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
+        testRuntimeOnly group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: logj4version
+        testRuntimeOnly group: 'com.lmax', name: 'disruptor', version: '3.3.7'
         testRuntime project(':test-commons')
     }
 
@@ -67,6 +67,9 @@ subprojects {
         enableStandardTestTask true
     }
 
+    test {
+        useJUnitPlatform()
+    }
 
 }
 
