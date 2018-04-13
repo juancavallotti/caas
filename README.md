@@ -29,6 +29,16 @@ Where `~/temp/data` and `~/temp/conf` are the data and configuration directories
 
 This repo provides a series of sample configurations, please feel free to ask through github issues if you want to use it and need additional information.
 
+There is a basic web UI to access the data on the repository:
+
+```http://localhost:8080```
+
+And the API will be located:
+
+```http://localhost:8080/api/configuration```
+
+For more information about the API Please visit the [API Portal](https://anypoint.mulesoft.com/exchange/portals/juancavallotti/843cd240-9258-4f63-be35-fcab8566eaea/Configuration-Service/)
+
 ## Building it
 
 This tool uses gradle v 4.6 or later, to build should be just enough with running:
